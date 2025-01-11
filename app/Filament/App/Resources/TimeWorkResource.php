@@ -1,0 +1,74 @@
+<?php
+
+namespace App\Filament\App\Resources;
+
+use App\Filament\App\Forms\ConfigGroup\FormAllmenuGroupConfig;
+use App\Filament\App\Forms\FormConfig;
+use App\Filament\App\Resources\TimeWorkResource\Pages;
+use App\Filament\App\Resources\TimeWorkResource\RelationManagers;
+use App\Filament\App\Tables\Config\TableTimeWork;
+use App\Models\CoreApp\TimeWork;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Table;
+
+class TimeWorkResource extends Resource implements HasShieldPermissions
+{
+    protected static ?string $model = TimeWork::class;
+    protected static ?string $navigationGroup = 'Config';
+    protected static ?string $navigationIcon = 'gmdi-access-time';
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'replicate',
+            'delete',
+            'delete_any',
+            'export',
+            'import',
+        ];
+    }
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Section::make(FormAllmenuGroupConfig::time_work())
+                    ->columns(FormConfig::columns(1, 2, 2, 2))
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns(TableTimeWork::table())
+            ->filters(TableTimeWork::filter(), layout: FiltersLayout::AboveContent)
+            ->filtersFormColumns(3)
+            ->actions([
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ReplicateAction::make(),
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ]),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ManageTimeWorks::route('/'),
+        ];
+    }
+}
