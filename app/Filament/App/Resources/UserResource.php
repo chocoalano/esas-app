@@ -33,6 +33,10 @@ class UserResource extends Resource implements HasShieldPermissions
             'import',
         ];
     }
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['nip', 'email', 'name'];
+    }
     public static function form(Form $form): Form
     {
         return $form->schema(FormUser::form());

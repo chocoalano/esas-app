@@ -1,10 +1,11 @@
 <?php
+
 namespace App\Http\Resources\User;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class UserWorkExperienceResource extends JsonResource
+class UserScheduleResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -15,12 +16,12 @@ class UserWorkExperienceResource extends JsonResource
     {
         return [
             "id" => $this->id,
-            'user_id' => $this->user_id,
-            'company_name' => $this->company_name,
-            'position' => $this->position,
-            'start' => $this->start,
-            'finish' => $this->finish,
-            'certification' => $this->certification,
+            "user_id" => $this->user_id,
+            "time_work_id" => $this->time_work_id,
+            "work_day" => $this->work_day,
+            "created_at" => $this->created_at,
+            "updated_at" => $this->updated_at,
+            "timework"=> new UserTimeworkResource($this->timework)
         ];
     }
 }

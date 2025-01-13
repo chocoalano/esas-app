@@ -101,4 +101,25 @@ class ProfilePartialUpdateRequest
             ],
         ];
     }
+    public static function update_bank($userId)
+    {
+        return [
+            'bank_name' => [
+                'required',
+                'string',
+                'min:3',
+            ],
+            'bank_number' => [
+                'required',
+                'numeric',
+                "unique:user_employes,bank_number,$userId",
+                'min:8',
+            ],
+            'bank_holder' => [
+                'required',
+                'string',
+                'min:2',
+            ],
+        ];
+    }
 }

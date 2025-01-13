@@ -8,6 +8,7 @@ use App\Filament\App\Widgets\AdvancedStatsOverviewWidget;
 use App\Filament\App\Widgets\AttendanceChartWidget;
 use App\Filament\App\Widgets\PermitChartWidget;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
 use Filament\FontProviders\GoogleFontProvider;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -49,7 +50,7 @@ class AppPanelProvider extends PanelProvider
             ->userMenuItems([
                 MenuItem::make()
                     ->label('Profile')
-                    ->url(fn (): string => Profile::getUrl())
+                    ->url(fn(): string => Profile::getUrl())
                     ->icon('gmdi-info')
             ])
             ->viteTheme('resources/css/filament/app/theme.css')
@@ -70,6 +71,7 @@ class AppPanelProvider extends PanelProvider
                         'default' => 1,
                         'sm' => 2,
                     ]),
+                GlobalSearchModalPlugin::make()->maxWidth(MaxWidth::TwoExtraLarge)
             ])
             ->sidebarCollapsibleOnDesktop()
             ->maxContentWidth(MaxWidth::Full)

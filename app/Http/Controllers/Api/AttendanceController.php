@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AdministrationApp\AttendanceRequest;
 use App\Http\Resources\Attendance\AttendanceDetailResource;
 use App\Http\Resources\Attendance\AttendanceLIstPaginateResource;
+use App\Http\Resources\Attendance\AttendanceResource;
 use App\Repositories\Interfaces\AdministrationApp\AttendanceInterface;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class AttendanceController extends Controller
@@ -20,6 +22,20 @@ class AttendanceController extends Controller
         $this->middleware('auth');
         $this->middleware('permission:view_user::attendance|view_any_user::attendance', ['only' => ['index', 'show']]);
         $this->middleware('permission:create_user::attendance', ['only' => ['store']]);
+    }
+    /**
+     * Display a listing of the resource.
+     */
+    public function auth_all(Request $request)
+    {
+        try {
+            $input = $request->only('search');
+            $data = $this->proses->auth_all($input['search']);
+            $response = AttendanceResource::collection($data);
+            return $this->sendResponse($response, 'Attendance show list successfully.');
+        } catch (\Exception $e) {
+            return $this->sendError('Process errors.', ['error' => $e->getMessage()]);
+        }
     }
     /**
      * Display a listing of the resource.

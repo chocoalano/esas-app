@@ -11,6 +11,7 @@ use App\Http\Resources\User\UserFormalEducationResource;
 use App\Http\Resources\User\UserInformalEducationResource;
 use App\Http\Resources\User\UserListPaginationResource;
 use App\Http\Resources\User\UserResource;
+use App\Http\Resources\User\UserScheduleResource;
 use App\Http\Resources\User\UserWorkExperienceResource;
 use App\Models\User;
 use App\Repositories\Interfaces\CoreApp\UserInterface;
@@ -78,6 +79,7 @@ class UserController extends Controller
             $success['token'] = $user->createToken('esas-app')->plainTextToken;
             $success['token_type'] = 'Bearer';
             $success['name'] = $user->name;
+            $success['userId'] = $user->id;
             return $this->sendResponse($success, 'User login successfully.');
         }
         return $this->sendError('Unauthorised.', ['error' => $proses['message']]);
@@ -201,6 +203,25 @@ class UserController extends Controller
         }
     }
     /**
+     * Store a users profile update bank.
+     */
+    public function profile_update_bank(Request $request)
+    {
+        try {
+            $id = Auth::user()->employee->id ?? null;
+            $valid = Validator::make($request->all(), ProfilePartialUpdateRequest::update_bank($id));
+
+            if ($valid->fails()) {
+                return $this->sendError('Validation Error.', $valid->errors(), 422);
+            }
+            $this->proses->auth_update_bank($valid->getData());
+            $response = $this->proses->find(Auth::user()->id);
+            return $this->sendResponse($response->employee, 'User detail work experience successfully.');
+        } catch (\Exception $e) {
+            return $this->sendError('Process errors.', ['error' => $e->getMessage()]);
+        }
+    }
+    /**
      * Store a users profile update password.
      */
     public function profile_update_password(Request $request)
@@ -251,6 +272,20 @@ class UserController extends Controller
             $path = Storage::disk(env('FILESYSTEM_DISK'))
                 ->path("avatar-users/{$user->avatar}");
             return response()->file($path);
+        } catch (\Exception $e) {
+            return $this->sendError('Process errors.', ['error' => $e->getMessage()]);
+        }
+    }
+    /**
+     * Store a users profile schedule.
+     */
+    public function profile_schedule()
+    {
+        try {
+            $user = Auth::user();
+            $schedule = $this->proses->schedule($user->id);
+            $response = new UserScheduleResource($schedule);
+            return $this->sendResponse($response, 'User schedule info successfully.');
         } catch (\Exception $e) {
             return $this->sendError('Process errors.', ['error' => $e->getMessage()]);
         }

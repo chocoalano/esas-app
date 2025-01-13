@@ -13,11 +13,11 @@ class UserWorkExperience extends Model
         'position',
         'start',
         'finish',
-        'description',
+        'certification',
     ];
 
     protected $casts = [
-        'description' => 'boolean',
+        'certification' => 'boolean',
     ];
 
     public function user()

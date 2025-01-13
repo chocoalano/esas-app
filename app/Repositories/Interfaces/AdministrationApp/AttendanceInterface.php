@@ -6,7 +6,7 @@ interface AttendanceInterface
     public function paginate(int $page, int $limit, string $search);
     public function countAll();
     public function chart(string $filter);
-    public function all();
+    public function auth_all(int $month);
     public function find(int $id);
     public function findbySchedule(int $id);
     public function create(array $data);

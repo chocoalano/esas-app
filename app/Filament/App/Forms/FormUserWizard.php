@@ -34,7 +34,8 @@ class FormUserWizard
                         FileUpload::make('avatar')
                             ->avatar()
                             ->image()
-                            ->disk('spaces')
+                            ->disk(env('FILESYSTEM_DISK'))
+                            ->visibility('public')
                             ->directory('avatar-users'),
                     ]),
                 Wizard\Step::make('Detail information')

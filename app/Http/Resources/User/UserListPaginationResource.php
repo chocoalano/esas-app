@@ -16,7 +16,7 @@ class UserListPaginationResource extends ResourceCollection
     {
         return [
             'current_page' => $this->currentPage(),
-            'data' => UserResource::collection($this->collection),
+            'data' => UserViewResource::collection($this->collection),
             'first_page_url' => $this->url(1),
             'from' => $this->firstItem(),
             'last_page' => $this->lastPage(),

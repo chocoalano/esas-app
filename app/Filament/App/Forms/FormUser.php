@@ -105,7 +105,8 @@ class FormUser
                 ->avatar()
                 ->image()
                 ->disk(env('FILESYSTEM_DISK'))
-                ->directory('avatar-users'),
+                ->directory('avatar-users')
+                ->visibility('public'),
         ];
     }
 

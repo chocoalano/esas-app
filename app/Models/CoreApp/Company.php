@@ -14,6 +14,12 @@ class Company extends Model
         'full_address',
     ];
 
+    protected $casts = [
+        'latitude' => 'double',
+        'longitude' => 'double',
+        'radius' => 'integer',
+    ];
+
     public function departments()
     {
         return $this->hasMany(Departement::class);

@@ -20,4 +20,6 @@ interface UserInterface
     public function auth_update_formal_education(array $data);
     public function auth_update_informal_education(array $data);
     public function auth_update_work_experience(array $data);
+    public function auth_update_bank(array $data);
+    public function schedule(int $userId);
 }

@@ -65,14 +65,16 @@ class FormAttendance
             FileUpload::make('image_in')
                 ->image()
                 ->avatar()
-                ->disk('spaces')
+                ->disk(env('FILESYSTEM_DISK'))
                 ->directory('attendance-in')
+                ->visibility('public')
                 ->required(),
             FileUpload::make('image_out')
                 ->image()
                 ->avatar()
-                ->disk('spaces')
+                ->disk(env('FILESYSTEM_DISK'))
                 ->directory('attendance-out')
+                ->visibility('public')
                 ->required(),
         ];
     }

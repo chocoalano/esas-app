@@ -24,9 +24,18 @@ class AttendanceService implements AttendanceInterface
     /**
      * @inheritDoc
      */
-    public function all()
+    public function auth_all(int $month)
     {
-        return $this->model->all();
+        $monthName = Carbon::create()->month($month)->format('m');
+        $auth = Auth::user();
+        $query = AttendanceView::where([
+            'user_id' => $auth->id,
+            'company_id' => $auth->company_id,
+        ])
+        ->whereMonth('created_at', $monthName)
+        ->whereYear('created_at', Carbon::now()->format('Y'))
+        ->get();
+        return $query;
     }
 
     /**

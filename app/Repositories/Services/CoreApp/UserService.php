@@ -1,9 +1,12 @@
 <?php
 namespace App\Repositories\Services\CoreApp;
 
+use App\Models\AdministrationApp\UserTimeworkSchedule;
 use App\Models\User;
+use App\Models\views\EmployeView;
 use App\Repositories\Interfaces\CoreApp\UserInterface;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -104,7 +107,7 @@ class UserService implements UserInterface
         $user = Auth::user();
         $isAdmin = $user->hasRole(['super_admin', 'Administrator']);
 
-        $query = $this->model->newQuery();
+        $query = EmployeView::query();
         // Filter data berdasarkan role
         if (!$isAdmin) {
             $query->whereHas('employee', function ($q) use ($user) {
@@ -211,7 +214,6 @@ class UserService implements UserInterface
             }
             return $data;
         } catch (\Exception $e) {
-            // dd($e->getMessage());
             return $e->getMessage();
         }
     }
@@ -347,5 +349,30 @@ class UserService implements UserInterface
             return true;
         }
         return false;
+    }
+    /**
+     * @inheritDoc
+     */
+    public function schedule(int $userId)
+    {
+        $schedule = UserTimeworkSchedule::with('timework')
+            ->where([
+                'user_id' => $userId,
+                'work_day' => Carbon::now()->format('Y-m-d')
+            ])
+            ->firstOrFail();
+        return $schedule;
+    }
+    /**
+     * @inheritDoc
+     */
+    public function auth_update_bank(array $data)
+    {
+        $auth = Auth::user();
+        $user = $this->model->find($auth->id);
+        $user->employee->updateOrCreate([
+            'user_id'=>$auth->id
+        ],$data);
+        return $user;
     }
 }
