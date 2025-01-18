@@ -39,9 +39,9 @@ class AppPanelProvider extends PanelProvider
             ->path('app')
             ->brandLogo(asset('assets/logo_esas_putih.svg'))
             ->login()
-            ->registration(Registration::class)
-            ->passwordReset()
-            ->emailVerification(EmailVerificationPrompt::class)
+            // ->registration(Registration::class)
+            // ->passwordReset()
+            // ->emailVerification(EmailVerificationPrompt::class)
             ->databaseNotifications()
             ->font('Ubuntu', provider: GoogleFontProvider::class)
             ->colors([

@@ -168,9 +168,9 @@ class FormUser
             Repeater::make('family')
                 ->schema([
                     TextInput::make('fullname'),
-                    ToggleButtons::make('relationship')->options(UserFamily::RELATIONSHIP)->grouped(),
+                    ToggleButtons::make('relationship')->options(UserFamily::RELATIONSHIP),
                     DatePicker::make('birthdate'),
-                    ToggleButtons::make('marital_status')->options(UserFamily::MARITAL_STATUS)->grouped(),
+                    ToggleButtons::make('marital_status')->options(UserFamily::MARITAL_STATUS),
                     TextInput::make('job'),
                 ])
                 ->columnSpanFull()
@@ -193,7 +193,7 @@ class FormUser
                     TextInput::make('score')->numeric(),
                     DatePicker::make('start')->default(Carbon::now()),
                     DatePicker::make('finish')->default(Carbon::now()),
-                    ToggleButtons::make('status')->options(UserFormalEducation::STATUS)->grouped(),
+                    ToggleButtons::make('status')->options(UserFormalEducation::STATUS),
                     ToggleButtons::make('certification')->boolean()->grouped(),
                 ])
                 ->columnSpanFull()
@@ -237,7 +237,7 @@ class FormUser
                     DatePicker::make('start')->default(Carbon::now()),
                     DatePicker::make('finish')->default(Carbon::now()),
                     TextInput::make('position'),
-                    ToggleButtons::make('status')->options(UserInformalEducation::STATUS)->grouped(),
+                    ToggleButtons::make('status')->options(UserInformalEducation::STATUS),
                     ToggleButtons::make('certification')->boolean()->grouped(),
                 ])
                 ->columnSpanFull()
