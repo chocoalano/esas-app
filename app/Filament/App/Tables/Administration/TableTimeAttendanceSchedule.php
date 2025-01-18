@@ -5,6 +5,8 @@ use App\Models\CoreApp\TimeWork;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Malzariey\FilamentDaterangepickerFilter\Filters\DateRangeFilter;
 class TableTimeAttendanceSchedule
@@ -36,12 +38,14 @@ class TableTimeAttendanceSchedule
         return [
             SelectFilter::make('user')
                 ->label('Filter by user')
-                ->relationship('user', 'name')
+                ->relationship('user', 'name', fn(Builder $query) => $query->with('company'))
+                ->getOptionLabelFromRecordUsing(fn(Model $record) => "{$record->company->name} | {$record->name}")
                 ->searchable()
                 ->preload(),
             SelectFilter::make('time')
                 ->label('Filter by time')
-                ->relationship('timework', 'name')
+                ->relationship('timework', 'name', fn(Builder $query) => $query->with('department', 'company'))
+                ->getOptionLabelFromRecordUsing(fn(Model $record) => "{$record->company->name} | {$record->name} | {$record->department->name}")
                 ->searchable()
                 ->preload(),
             DateRangeFilter::make('work_day')

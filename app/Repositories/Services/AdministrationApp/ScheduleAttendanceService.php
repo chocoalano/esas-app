@@ -4,13 +4,9 @@ namespace App\Repositories\Services\AdministrationApp;
 use App\Jobs\InsertUpdateScheduleJob;
 use App\Models\AdministrationApp\UserTimeworkSchedule;
 use App\Repositories\Interfaces\AdministrationApp\ScheduleAttendanceInterface;
-use App\Repositories\Interfaces\CoreApp\DepartementInterface;
-use App\Repositories\Interfaces\CoreApp\TimeWorkInterface;
-use App\Repositories\Interfaces\CoreApp\UserInterface;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
@@ -35,7 +31,7 @@ class ScheduleAttendanceService implements ScheduleAttendanceInterface
                 isset($k['company'], $k['nip'], $k['name'], $k['department'], $k['shift_name'], $k['shift_date']) ||
                 !empty($k['company']) || !empty($k['nip']) || !empty($k['name']) ||
                 !empty($k['department']) || !empty($k['shift_name']) || !empty($k['shift_date'])
-                ) {
+            ) {
                 // Temukan user berdasarkan NIP
                 $user = DB::table('users')
                     ->join('user_employes', 'users.id', '=', 'user_employes.user_id')
@@ -82,6 +78,7 @@ class ScheduleAttendanceService implements ScheduleAttendanceInterface
      */
     public function template()
     {
+        $user = Auth::user();
         $spreadsheet = new Spreadsheet();
 
         // Sheet utama
@@ -90,137 +87,144 @@ class ScheduleAttendanceService implements ScheduleAttendanceInterface
 
         // Header untuk sheet utama
         $headers = [
-            'A' => 'company',
-            'B' => 'nip',        // Akan menjadi select option
-            'C' => 'name',
-            'D' => 'department',
-            'E' => 'shift_name', // Akan menjadi select option
-            'F' => 'shift_date',
+            'A' => 'Company',
+            'B' => 'NIP',        // Akan menjadi select option
+            'C' => 'Name',
+            'D' => 'Department',
+            'E' => 'Shift Name', // Akan menjadi select option
+            'F' => 'Shift Date',
         ];
 
-        // Loop untuk mengisi header
+        // Mengisi header
         foreach ($headers as $column => $header) {
             $mainSheet->setCellValue("{$column}1", $header);
         }
 
-        // Ambil data untuk bulan ini
+        // Filter tanggal bulan ini
         $currentMonthStart = Carbon::now()->startOfMonth()->toDateString();
         $currentMonthEnd = Carbon::now()->endOfMonth()->toDateString();
 
-        $data_template = DB::table('users as u')
+        // Query untuk mengambil data utama
+        $dataTemplateQuery = DB::table('users as u')
             ->join('companies as c', 'c.id', '=', 'u.company_id')
             ->join('user_employes as ue', 'ue.user_id', '=', 'u.id')
             ->join('departements as d', 'd.id', '=', 'ue.departement_id')
             ->join('user_timework_schedules as uts', 'uts.user_id', '=', 'u.id')
-            ->join('time_workes as tw', 'uts.time_work_id', '=', 'tw.id');
+            ->join('time_workes as tw', 'uts.time_work_id', '=', 'tw.id')
+            ->select([
+                'c.name as company_name',
+                'u.nip as user_nip',
+                'u.name as user_name',
+                'd.name as department_name',
+                'tw.name as shift_name',
+                'uts.work_day as schedule_date',
+            ])
+            ->whereBetween('uts.work_day', [$currentMonthStart, $currentMonthEnd]);
 
-        // Filter data berdasarkan role pengguna
-        if (Auth::user()->hasRole(['Admin Departement', 'Member'])) {
-            $data_template->where('c.name', Auth::user()->company->name)
-                ->where('d.id', Auth::user()->employee->departement_id);
+        // Filter berdasarkan role
+        if ($user->hasRole(['Admin Departement', 'Member'])) {
+            $dataTemplateQuery->where('c.id', $user->company_id)
+                ->where('d.id', $user->employee->departement_id);
         }
 
-        // Select kolom yang diinginkan
-        $data_template->select([
-            'c.name as company_name',
-            'u.nip as user_nip',
-            'u.name as user_name',
-            'd.name as department_name',
-            'tw.name as shift_name',
-            'uts.work_day as schedule_date',
-        ]);
+        // Eksekusi query
+        $dataTemplate = $dataTemplateQuery->get();
 
-        // Filter berdasarkan rentang tanggal
-        $data_template->whereBetween('uts.work_day', [$currentMonthStart, $currentMonthEnd]);
-
-        // Eksekusi query dan dapatkan hasil
-        $results = $data_template->get();
-
-        // Cek jika data_template tidak kosong
-        if (!$results->isEmpty()) {
-            // Tulis data ke sheet utama mulai dari baris kedua
-            $i = 2;
-            foreach ($results as $key) {
-                $mainSheet->setCellValue("A{$i}", $key->company_name);
-                $mainSheet->setCellValue("B{$i}", $key->user_nip);
-                $mainSheet->setCellValue("C{$i}", $key->user_name);
-                $mainSheet->setCellValue("D{$i}", $key->department_name);
-                $mainSheet->setCellValue("E{$i}", $key->shift_name);
-                $mainSheet->setCellValue("F{$i}", $key->schedule_date);
-                $i++;
+        // Isi data ke sheet utama
+        if ($dataTemplate->isNotEmpty()) {
+            $row = 2;
+            foreach ($dataTemplate as $data) {
+                $mainSheet->setCellValue("A{$row}", $data->company_name);
+                $mainSheet->setCellValue("B{$row}", $data->user_nip);
+                $mainSheet->setCellValue("C{$row}", $data->user_name);
+                $mainSheet->setCellValue("D{$row}", $data->department_name);
+                $mainSheet->setCellValue("E{$row}", $data->shift_name);
+                $mainSheet->setCellValue("F{$row}", $data->schedule_date);
+                $row++;
             }
         }
 
-        // Sheet baru untuk Shift Options
+        // Buat sheet Shift Options
         $shiftSheet = $spreadsheet->createSheet();
         $shiftSheet->setTitle('Shift Options');
-
-        // Ambil data shift untuk referensi
-        $shifts = DB::table('time_workes')
-            ->where([
-                'company_id' => Auth::user()->company_id,
-                'departemen_id' => Auth::user()->employee->departement_id,
-            ])
-            ->select('name')->get();
-
-        // Isi data Shift Options
         $shiftSheet->setCellValue('A1', 'Shift Name');
+        $shiftSheet->setCellValue('B1', 'Departement');
+        $shiftSheet->setCellValue('C1', 'Company');
 
-        if (!$shifts->isEmpty()) {
-            $j = 2;
+        // Ambil data shift
+        $shiftQuery = DB::table('time_workes')
+        ->join('companies', 'companies.id', '=', 'time_workes.company_id')
+        ->join('departements', 'departements.id', '=', 'time_workes.departemen_id')
+        ->select('time_workes.name', 'companies.name as company', 'departements.name as departemen');
+        if ($user->hasRole(['Admin Departement', 'Member'])) {
+            $shiftQuery
+            ->where('company_id', $user->company_id)
+            ->where('departemen_id', $user->employee->departemens_id);
+        }
+        $shifts = $shiftQuery->get();
+
+        if ($shifts->isNotEmpty()) {
+            $row = 2;
             foreach ($shifts as $shift) {
-                $shiftSheet->setCellValue("A{$j}", $shift->name);
-                $j++;
+                $shiftSheet->setCellValue("A{$row}", $shift->name);
+                $shiftSheet->setCellValue("B{$row}", $shift->departemen);
+                $shiftSheet->setCellValue("C{$row}", $shift->company);
+                $row++;
             }
 
-            // Definisikan Named Range untuk rentang opsi jika data shift ada
+            // Tambahkan Named Range untuk Shift Options
             $spreadsheet->addNamedRange(
                 new \PhpOffice\PhpSpreadsheet\NamedRange(
                     'ShiftOptions',
                     $shiftSheet,
-                    "\$A\$2:\$A\$" . ($j - 1)
+                    "\$A\$2:\$A\$" . ($row - 1)
                 )
             );
         }
 
-        // Sheet baru untuk Users
+        // Buat sheet Users
         $userSheet = $spreadsheet->createSheet();
         $userSheet->setTitle('Users');
-
-        // Ambil data user untuk referensi
-        $users = DB::table('users')
-            ->select(['nip', 'name'])
-            ->join('user_employes', 'user_employes.user_id', '=', 'users.id')
-            ->where('users.company_id', Auth::user()->company_id)
-            ->where('user_employes.departement_id', Auth::user()->employee->departement_id)
-            ->get();
-
-        // Isi data Users
         $userSheet->setCellValue('A1', 'NIP');
         $userSheet->setCellValue('B1', 'Name');
+        $userSheet->setCellValue('C1', 'Departement');
+        $userSheet->setCellValue('D1', 'Company');
 
-        if (!$users->isEmpty()) {
-            $k = 2;
-            foreach ($users as $user) {
-                $userSheet->setCellValue("A{$k}", $user->nip);
-                $userSheet->setCellValue("B{$k}", $user->name);
-                $k++;
+        // Ambil data user
+        $userQuery = DB::table('users')
+            ->join('user_employes', 'user_employes.user_id', '=', 'users.id')
+            ->join('departements', 'departements.id', '=', 'user_employes.departement_id')
+            ->join('companies', 'companies.id', '=', 'users.company_id')
+            ->select(['users.nip', 'users.name', 'departements.name as departemen', 'companies.name as company']);
+        if ($user->hasRole(['Admin Departement', 'Member'])) {
+            $userQuery->where('users.company_id', $user->company_id)
+                ->where('users.company_id', $user->company_id)
+                ->where('user_employes.departement_id', $user->employee->departement_id);
+        }
+        $users = $userQuery->get();
+
+        if ($users->isNotEmpty()) {
+            $row = 2;
+            foreach ($users as $userData) {
+                $userSheet->setCellValue("A{$row}", $userData->nip);
+                $userSheet->setCellValue("B{$row}", $userData->name);
+                $userSheet->setCellValue("C{$row}", $userData->departemen);
+                $userSheet->setCellValue("D{$row}", $userData->company);
+                $row++;
             }
 
-            // Definisikan Named Range untuk rentang opsi NIP
+            // Tambahkan Named Range untuk User Options
             $spreadsheet->addNamedRange(
                 new \PhpOffice\PhpSpreadsheet\NamedRange(
                     'NIPOptions',
                     $userSheet,
-                    "\$A\$2:\$A\$" . ($k - 1)
+                    "\$A\$2:\$A\$" . ($row - 1)
                 )
             );
         }
 
-        // Set dropdown pada kolom NIP di sheet utama
+        // Set dropdown untuk kolom NIP
         $highestRow = $mainSheet->getHighestRow();
-        $nipDropdownRange = 'NIPOptions';
-
         for ($row = 2; $row <= $highestRow; $row++) {
             $validation = $mainSheet->getCell("B{$row}")->getDataValidation();
             $validation->setType(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::TYPE_LIST);
@@ -229,19 +233,19 @@ class ScheduleAttendanceService implements ScheduleAttendanceInterface
             $validation->setShowInputMessage(true);
             $validation->setShowErrorMessage(true);
             $validation->setShowDropDown(true);
-            $validation->setFormula1($nipDropdownRange);
+            $validation->setFormula1('NIPOptions');
         }
 
-        // Nama file untuk di-download
-        $fileName = 'template-import-schedule-attendance-' . Carbon::now()->format('YmdHis') . '.xlsx';
-        $writer = new Xlsx($spreadsheet);
+        // Nama file untuk download
+        $fileName = 'template-import-schedule-' . Carbon::now()->format('YmdHis') . '.xlsx';
         $filePath = public_path($fileName);
+        $writer = new Xlsx($spreadsheet);
 
-        // Simpan file ke public_path dan kembalikan response untuk download
+        // Simpan file dan kembalikan response untuk download
         $writer->save($filePath);
-
         return response()->download($filePath)->deleteFileAfterSend();
     }
+
     /**
      * @inheritDoc
      */

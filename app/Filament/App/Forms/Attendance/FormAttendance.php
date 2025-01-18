@@ -124,6 +124,7 @@ class FormAttendance
                     }
                     return [];
                 })
+                ->visible(fn(Get $get) => $get('company_id') !== null ? true : false)
                 ->preload()
                 ->searchable()
                 ->live()
@@ -146,6 +147,7 @@ class FormAttendance
                 ->preload()
                 ->searchable()
                 ->multiple()
+                ->visible(fn(Get $get) => $get('company_id') !== null && $get('departement') !== null ? true : false)
                 ->required(),
             Select::make('time_work_id')
                 ->label('Choose time')
@@ -167,16 +169,19 @@ class FormAttendance
                 ->createOptionUsing(function (array $data, TimeWorkInterface $service): Model {
                     return $service->create($data);
                 })
+                ->visible(fn(Get $get) => $get('company_id') !== null && $get('departement') !== null && $get('user_id') !== null ? true : false)
                 ->required(),
             DatePicker::make('work_day_start')
                 ->before('work_day_finish')
                 ->minDate(now()->startOfYear())
                 ->maxDate(now()->endOfYear())
+                ->visible(fn(Get $get) => $get('company_id') !== null && $get('departement') !== null && $get('user_id') !== null ? true : false)
                 ->required(),
             DatePicker::make('work_day_finish')
                 ->after('work_day_start')
                 ->minDate(now()->startOfYear())
                 ->maxDate(now()->endOfYear())
+                ->visible(fn(Get $get) => $get('company_id') !== null && $get('departement') !== null && $get('user_id') !== null ? true : false)
                 ->required(),
             Select::make('dayoff')
                 ->options([
@@ -189,6 +194,7 @@ class FormAttendance
                     'Sunday' => 'Sabtu',
                 ])
                 ->multiple()
+                ->visible(fn(Get $get) => $get('company_id') !== null && $get('departement') !== null && $get('user_id') !== null ? true : false)
                 ->required()
         ];
     }
