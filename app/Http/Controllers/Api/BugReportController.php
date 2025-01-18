@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Tools\BugReportRequest;
+use App\Http\Resources\Tools\BugReportListPaginationResource;
 use App\Repositories\Interfaces\Tools\BugReportInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -29,7 +30,8 @@ class BugReportController extends Controller
             $search = is_string($search) ? $search : '';
 
             // Panggil metode paginate
-            $response = $this->proses->paginate($page, $limit, $search);
+            $data = $this->proses->paginate($page, $limit, $search);
+            $response = new BugReportListPaginationResource($data);
 
             // Kembalikan response berhasil
             return $this->sendResponse($response, 'Bug reports show list successfully.');

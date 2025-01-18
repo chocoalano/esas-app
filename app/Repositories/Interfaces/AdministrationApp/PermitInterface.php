@@ -6,6 +6,7 @@ interface PermitInterface
     public function generate_unique_numbers(int $permit_type_id);
     public function countAll();
     public function chart(string $filter);
+    public function type();
     public function all();
     public function paginate(int $page, int $limit, string $search, int $type);
     public function find(int $id);

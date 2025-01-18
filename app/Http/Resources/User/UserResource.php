@@ -1,6 +1,9 @@
 <?php
 namespace App\Http\Resources\User;
 
+use App\Http\Resources\CoreApp\DepartementResource;
+use App\Http\Resources\CoreApp\JobLevelResource;
+use App\Http\Resources\CoreApp\JobPositionResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -32,6 +35,9 @@ class UserResource extends JsonResource
             'informal_educations' => UserInformalEducationResource::collection($this->informalEducations),
             'work_experiences' => UserWorkExperienceResource::collection($this->workExperiences),
             'employee' => new UserEmployeeResource($this->employee),
+            // 'departement_info' => new DepartementResource($this->departement_info),
+            // 'position_info' => new JobPositionResource($this->position_info),
+            // 'level_info' => new JobLevelResource($this->level_info),
         ];
     }
 }

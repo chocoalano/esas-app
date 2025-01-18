@@ -24,6 +24,7 @@ class Permit extends Model
         'start_time',
         'end_time',
         'notes',
+        'file',
     ];
 
     /**

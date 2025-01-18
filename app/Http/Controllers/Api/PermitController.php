@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AdministrationApp\PermitRequest;
 use App\Http\Resources\Permit\PermitListPaginationResource;
+use App\Models\AdministrationApp\UserTimeworkSchedule;
 use App\Repositories\Interfaces\AdministrationApp\PermitInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -44,8 +45,12 @@ class PermitController extends Controller
     public function store(Request $request)
     {
         try {
-            // Tentukan aturan validasi berdasarkan permit_type_id
-            $permitTypeId = $request->input('permit_type_id');
+            $input = $request->all();
+            if (isset($input['type']) && $input['type'] === 'mobile') {
+                $input['user_id']=Auth::user()->id;
+                $input['permit_numbers']=$this->proses->generate_unique_numbers($input['permit_type_id']);
+            }
+            $permitTypeId = $input['permit_type_id'];
             $validationRules = match ($permitTypeId) {
                 15 => PermitRequest::koreksi_absen(),
                 16 => PermitRequest::perubahan_shift(),
@@ -53,11 +58,12 @@ class PermitController extends Controller
             };
 
             // Validasi data
-            $valid = Validator::make($request->all(), $validationRules);
+            $valid = Validator::make($input, $validationRules);
             if ($valid->fails()) {
                 return $this->sendError('Validation Error.', ['errors' => $valid->errors()], 422);
             }
-            $created = $this->proses->create($valid->getData());
+            $input = $valid->getData();
+            $created = $this->proses->create($input);
 
             return $this->sendResponse($created, 'Permit created successfully.');
         } catch (\Throwable $e) {

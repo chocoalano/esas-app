@@ -12,6 +12,8 @@ class PermitType extends Model
         'approve_line',
         'approve_manager',
         'approve_hr',
+        'show_mobile',
+        'with_file',
     ];
 
     /**
@@ -27,5 +29,7 @@ class PermitType extends Model
         'approve_line' => 'boolean',
         'approve_manager' => 'boolean',
         'approve_hr' => 'boolean',
+        'show_mobile' => 'boolean',
+        'with_file' => 'boolean',
     ];
 }

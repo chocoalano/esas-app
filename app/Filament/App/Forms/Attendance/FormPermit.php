@@ -7,6 +7,7 @@ use App\Models\CoreApp\TimeWork;
 use App\Models\User;
 use App\Repositories\Interfaces\AdministrationApp\PermitInterface;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -127,6 +128,12 @@ class FormPermit
                 ->visible(fn(Get $get) => self::isVisiblePermitType($get('permit_type_id'))),
             Textarea::make('notes')
                 ->columnSpanFull(),
+            FileUpload::make('file')
+                ->disk(env('FILESYSTEM_DISK'))
+                ->directory('permit-attachments')
+                ->visible(fn(Get $get) => self::isVisiblePermitTypeWithFile($get('permit_type_id')))
+                ->required()
+                ->columnSpanFull(),
         ];
     }
     public static function isVisiblePermitTypeChangeShift($permit_type_id): bool
@@ -166,6 +173,17 @@ class FormPermit
             return false;
         }
     }
+    public static function isVisiblePermitTypeWithFile($permit_type_id): bool
+    {
+        if (!$permit_type_id) {
+            return false;
+        }
+        $permit_type = PermitType::find($permit_type_id);
+        if (!$permit_type) {
+            return false;
+        }
+        return $permit_type->with_file;
+    }
     public static function type()
     {
         return [
@@ -183,6 +201,12 @@ class FormPermit
                 ->inline(false)
                 ->required(),
             Toggle::make('approve_hr')
+                ->inline(false)
+                ->required(),
+            Toggle::make('with_file')
+                ->inline(false)
+                ->required(),
+            Toggle::make('show_mobile')
                 ->inline(false)
                 ->required(),
         ];

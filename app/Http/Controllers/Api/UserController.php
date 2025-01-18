@@ -12,10 +12,15 @@ use App\Http\Resources\User\UserInformalEducationResource;
 use App\Http\Resources\User\UserListPaginationResource;
 use App\Http\Resources\User\UserResource;
 use App\Http\Resources\User\UserScheduleResource;
+use App\Http\Resources\User\UserViewResource;
 use App\Http\Resources\User\UserWorkExperienceResource;
+use App\Models\AdministrationApp\UserAttendance;
+use App\Models\CoreApp\TimeWork;
 use App\Models\User;
 use App\Repositories\Interfaces\CoreApp\UserInterface;
+use App\Support\UploadFile;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -108,6 +113,15 @@ class UserController extends Controller
             return $this->sendError('Process errors.', ['error' => $e->getMessage()]);
         }
     }
+    public function profile_display()
+    {
+        try {
+            $detail = $this->proses->profile();
+            return $this->sendResponse(new UserViewResource($detail), 'User detail access successfully.');
+        } catch (\Exception $e) {
+            return $this->sendError('Process errors.', ['error' => $e->getMessage()]);
+        }
+    }
     /**
      * Store a users profile update.
      */
@@ -124,6 +138,35 @@ class UserController extends Controller
             return $this->sendResponse(new UserResource($detail), 'User detail update successfully.');
         } catch (\Exception $e) {
             return $this->sendError('Process errors.', ['error' => $e->getMessage()]);
+        }
+    }
+    /**
+     * Store a users profile update avatar.
+     */
+    public function profile_avatar(Request $request)
+    {
+        try {
+            $valid = Validator::make($request->all(), [
+                'avatar' => 'required|mimes:jpeg,jpg,png,bmp,webp,heic,tiff|max:10000',
+            ]);
+            if ($valid->fails()) {
+                return $this->sendError('Validation Error.', $valid->errors(), 422);
+            }
+            $user = Auth::user();
+            if ($user->avatar) {
+                UploadFile::unlink($user->avatar);
+            }
+            $uploadedFile = $request->file('avatar');
+            $uploadPath = UploadFile::uploadWithResize($uploadedFile, 'avatar-users');
+            $user->update(['avatar' => $uploadPath]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Avatar updated successfully.',
+                'avatar_url' => env('APP_URL') . "/api/assets/" . $uploadPath,
+            ], 200);
+        } catch (\Exception $e) {
+            return $this->sendError('Process Error.', ['error' => $e->getMessage()], 500);
         }
     }
     /**
@@ -255,28 +298,6 @@ class UserController extends Controller
         }
     }
     /**
-     * Store a users profile avatar.
-     */
-    public function profile_avatar()
-    {
-        try {
-            $user = Auth::user();
-            if (
-                !Storage::disk(env('FILESYSTEM_DISK'))
-                    ->exists("avatar-users/{$user->avatar}")
-            ) {
-                return response()->json([
-                    'message' => 'Image not found',
-                ], 404);
-            }
-            $path = Storage::disk(env('FILESYSTEM_DISK'))
-                ->path("avatar-users/{$user->avatar}");
-            return response()->file($path);
-        } catch (\Exception $e) {
-            return $this->sendError('Process errors.', ['error' => $e->getMessage()]);
-        }
-    }
-    /**
      * Store a users profile schedule.
      */
     public function profile_schedule()
@@ -286,6 +307,56 @@ class UserController extends Controller
             $schedule = $this->proses->schedule($user->id);
             $response = new UserScheduleResource($schedule);
             return $this->sendResponse($response, 'User schedule info successfully.');
+        } catch (\Exception $e) {
+            return $this->sendError('Process errors.', ['error' => $e->getMessage()]);
+        }
+    }
+    /**
+     * Store a users profile schedule.
+     */
+    public function profile_schedule_list()
+    {
+        try {
+            $user = Auth::user();
+            $schedule = $this->proses->profile_schedule_list($user->id);
+            // $response = new UserScheduleResource($schedule);
+            return $this->sendResponse($schedule, 'User schedule info successfully.');
+        } catch (\Exception $e) {
+            return $this->sendError('Process errors.', ['error' => $e->getMessage()]);
+        }
+    }
+    /**
+     * Store a users profile list time.
+     */
+    public function profile_list_time()
+    {
+        try {
+            $user = Auth::user();
+            $time = TimeWork::where(function ($q) use ($user) {
+                $q->where('company_id', $user->company_id)
+                    ->where('departemen_id', $user->employee->departement_id);
+            })->get();
+            return $this->sendResponse($time, 'User time list successfully.');
+        } catch (\Exception $e) {
+            return $this->sendError('Process errors.', ['error' => $e->getMessage()]);
+        }
+    }
+    /**
+     * Store a users profile list time.
+     */
+    public function profile_current_attendance()
+    {
+        try {
+            $user = Auth::user();
+            $date = Carbon::now()->format('Y-m-d');
+            $attendance = UserAttendance::where(function ($q) use ($user, $date) {
+                $q->where('user_id', $user->id)
+                    ->whereHas('schedule', function($schedule) use ($date){
+                        $schedule->whereDate('work_day', $date);
+                    })
+                    ->orWhereDate('created_at', $date);
+            })->firstOrFail();
+            return $this->sendResponse($attendance, 'User attendance now successfully.');
         } catch (\Exception $e) {
             return $this->sendError('Process errors.', ['error' => $e->getMessage()]);
         }

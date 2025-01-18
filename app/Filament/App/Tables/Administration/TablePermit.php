@@ -73,6 +73,10 @@ class TablePermit
                 ->disabled(fn() => auth()->user()->can('update_permit::type') ? false : true),
             ToggleColumn::make('approve_hr')
                 ->disabled(fn() => auth()->user()->can('update_permit::type') ? false : true),
+            ToggleColumn::make('with_file')
+                ->disabled(fn() => auth()->user()->can('update_permit::type') ? false : true),
+            ToggleColumn::make('show_mobile')
+                ->disabled(fn() => auth()->user()->can('update_permit::type') ? false : true),
             TextColumn::make('created_at')
                 ->dateTime()
                 ->sortable()

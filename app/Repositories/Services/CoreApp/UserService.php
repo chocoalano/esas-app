@@ -98,6 +98,14 @@ class UserService implements UserInterface
                 'employee'
             )->findOrFail($id);
     }
+    /**
+     * @inheritDoc
+     */
+    public function profile()
+    {
+        $id = Auth::user()->id;
+        return EmployeView::find($id);
+    }
 
     /**
      * @inheritDoc
@@ -374,5 +382,17 @@ class UserService implements UserInterface
             'user_id'=>$auth->id
         ],$data);
         return $user;
+    }
+    /**
+     * @inheritDoc
+     */
+    public function profile_schedule_list(int $userId)
+    {
+        $schedule = UserTimeworkSchedule::with('timework')
+            ->where('user_id', $userId)
+            ->whereYear('work_day', Carbon::now()->year)
+            ->whereMonth('work_day', Carbon::now()->month)
+            ->get();
+        return $schedule;
     }
 }

@@ -15,6 +15,7 @@ interface UserInterface
     public function delete(int $id): bool;
     public function countAll(): int;
     public function login(array $data);
+    public function profile();
     public function update_password(int $userId, array $data);
     public function auth_update_family(array $data);
     public function auth_update_formal_education(array $data);
@@ -22,4 +23,5 @@ interface UserInterface
     public function auth_update_work_experience(array $data);
     public function auth_update_bank(array $data);
     public function schedule(int $userId);
+    public function profile_schedule_list(int $userId);
 }

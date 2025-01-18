@@ -1,13 +1,17 @@
 <?php
 
 use App\Http\Controllers\Api\AnnouncementController;
+use App\Http\Controllers\Api\AssetsController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\BugReportController;
 use App\Http\Controllers\Api\FormController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PermitController;
+use App\Http\Controllers\Api\PermitTypeController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/assets/{folder}/{filename}', [AssetsController::class, 'index']);
 
 Route::prefix('auth')->group(function () {
     Route::controller(UserController::class)
@@ -22,6 +26,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::controller(UserController::class)
             ->group(function () {
                 Route::get('profile', 'profile');
+                Route::get('profile-display', 'profile_display');
+                Route::post('profile-avatar', 'profile_avatar');
                 Route::get('profile-permission', 'profile_permission');
                 Route::post('profile-update', 'profile_update');
                 Route::post('profile-update-family', 'profile_update_family');
@@ -30,8 +36,10 @@ Route::middleware('auth:sanctum')->group(function () {
                 Route::post('profile-update-work-experience', 'profile_update_work_experience');
                 Route::post('profile-update-bank', 'profile_update_bank');
                 Route::post('profile-update-password', 'profile_update_password');
-                Route::get('profile-avatar', 'profile_avatar');
                 Route::get('profile-schedule', 'profile_schedule');
+                Route::get('profile-schedule-list', 'profile_schedule_list');
+                Route::get('profile-list-time', 'profile_list_time');
+                Route::get('profile-current-attendance', 'profile_current_attendance');
                 Route::post('logout', 'logout');
             });
 
@@ -52,8 +60,10 @@ Route::middleware('auth:sanctum')->group(function () {
         // 'roles' => RoleController::class,
         'user' => UserController::class,
         'permit' => PermitController::class,
+        'permit-type' => PermitTypeController::class,
         'attendance' => AttendanceController::class,
         'announcement' => AnnouncementController::class,
         'bug-report' => BugReportController::class,
+        'notification' => NotificationController::class,
     ]);
 });

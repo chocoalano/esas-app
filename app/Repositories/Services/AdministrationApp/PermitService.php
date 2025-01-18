@@ -8,7 +8,9 @@ use App\Repositories\Interfaces\AdministrationApp\AttendanceInterface;
 use App\Repositories\Interfaces\AdministrationApp\PermitInterface;
 use App\Repositories\Interfaces\AdministrationApp\ScheduleAttendanceInterface;
 use App\Repositories\Interfaces\CoreApp\UserInterface;
+use App\Support\NotificationService;
 use App\Support\StringSupport;
+use App\Support\UploadFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -16,10 +18,12 @@ use Illuminate\Support\Facades\DB;
 class PermitService implements PermitInterface
 {
     protected $model;
+    protected $type;
 
-    public function __construct(Permit $model)
+    public function __construct(Permit $model, PermitType $type)
     {
         $this->model = $model;
+        $this->type = $type;
     }
 
     /**
@@ -47,7 +51,7 @@ class PermitService implements PermitInterface
         // Menentukan nomor urut berikutnya
         $lastNumber = 0;
         if ($lastRecord) {
-            $lastReference = explode('/', $lastRecord->reference);
+            $lastReference = explode('/', $lastRecord->permit_numbers);
             $lastNumber = intval(end($lastReference));
         }
         $nextNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
@@ -168,6 +172,10 @@ class PermitService implements PermitInterface
     public function create(array $data)
     {
         return DB::transaction(function () use ($data) {
+            if (isset($data['file']) && !empty($data['file'])) {
+                $attachment = UploadFile::uploadAttachment($data['file'], 'permit-attachments');
+                $data['file'] = $attachment;
+            }
             // Buat permit
             $permit = $this->model->create($data);
 
@@ -220,7 +228,8 @@ class PermitService implements PermitInterface
             $url = route('filament.app.resources.permits.index');
             $message = 'Hello, I am submitting a request, please check now.!';
             foreach ($approval as $k) {
-                broadcast(new MessageSent($message, $permit->user_id, $k['user_id'], $url));
+                // broadcast(new MessageSent($message, $permit->user_id, $k['user_id'], $url));
+                NotificationService::sendNotification('Informasi permintaan', $message, $url, $k['user_id']);
             }
         });
     }
@@ -358,7 +367,11 @@ class PermitService implements PermitInterface
         $isAdmin = $user->hasRole(['super_admin', 'Administrator']);
 
         $query = $this->model->newQuery();
-
+        $query->with(
+            'permitType',
+            'approvals',
+            'userTimeworkSchedule',
+        );
         // Filter berdasarkan tipe izin
         $query->where('permit_type_id', $type);
 
@@ -374,12 +387,26 @@ class PermitService implements PermitInterface
 
         // Pencarian berdasarkan nama
         if (!empty($search)) {
-            $query->whereHas('user', function ($q) use ($search) {
+            $query
+            ->whereHas('user', function ($q) use ($search) {
                 $q->where('name', 'LIKE', '%' . $search . '%');
+            })
+            ->orWhereHas('approvals', function ($q) use ($search, $user) {
+                $q
+                ->where('user_id', $user->id)
+                ->where('user_approve', 'LIKE', '%' . $search . '%');
             });
         }
+        $query->orderByDesc('created_at');
 
         // Paginate hasil query
         return $query->paginate($limit, ['*'], 'page', $page);
+    }
+    /**
+     * @inheritDoc
+     */
+    public function type()
+    {
+        return $this->type->where('show_mobile', true)->get();
     }
 }

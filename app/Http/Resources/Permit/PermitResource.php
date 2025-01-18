@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources\Permit;
 
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class PermitResource extends JsonResource
@@ -13,7 +12,7 @@ class PermitResource extends JsonResource
      * @param \Illuminate\Http\Request $request
      * @return array<string, mixed>
      */
-    public function toArray(Request $request): array
+    public function toArray($request): array
     {
         return [
             'id' => $this->id,
@@ -30,8 +29,12 @@ class PermitResource extends JsonResource
             'start_time' => $this->start_time,
             'end_time' => $this->end_time,
             'notes' => $this->notes,
+            'file' => $this->file,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'permit_type' => new PermitTypeJsonResource($this->permitType),
+            'approvals' => ApprovalJsonResource::collection($this->approvals),
+            'user_timework_schedule' => new UserTimeworkScheduleResource($this->userTimeworkSchedule),
         ];
     }
 }

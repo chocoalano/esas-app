@@ -3,7 +3,6 @@
 namespace App\Http\Resources\Permit;
 
 use App\Http\Resources\Attendance\ScheduleResource;
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class PermitDetailResource extends ResourceCollection
