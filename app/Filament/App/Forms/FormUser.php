@@ -20,7 +20,6 @@ use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Carbon;
 use Spatie\Permission\Models\Role;
 
@@ -101,9 +100,9 @@ class FormUser
                     'nip',       // Kolom yang divalidasi
                     ignoreRecord: true
                 )
-                ->default(fake()->randomNumber(5))
+                ->default(env('APP_DEBUG') ? null : fake()->randomNumber(5))
                 ->required(),
-            TextInput::make('name')->default(fake()->name())->required(),
+            TextInput::make('name')->default(env('APP_DEBUG') ? null : fake()->name())->required(),
             TextInput::make('email')
                 ->email()
                 ->unique(
@@ -113,8 +112,8 @@ class FormUser
                 )
                 ->default(fake()->email())
                 ->required(),
-            TextInput::make('password')->default('123456789')->confirmed(),
-            TextInput::make('password_confirmation')->default('123456789'),
+            TextInput::make('password')->default('123456789')->password()->confirmed(),
+            TextInput::make('password_confirmation')->password()->default('123456789'),
             ToggleButtons::make('status')
                 ->label('Set status user')
                 ->options(User::STATUS)
@@ -136,8 +135,8 @@ class FormUser
     public static function detail()
     {
         return [
-            TextInput::make('phone')->numeric()->tel()->required()->default(fake()->numerify('##########')),
-            TextInput::make('placebirth')->required()->default(fake()->city()),
+            TextInput::make('phone')->numeric()->tel()->required()->default(env('APP_DEBUG') ? null : fake()->numerify('##########')),
+            TextInput::make('placebirth')->required()->default(env('APP_DEBUG') ? null : fake()->city()),
             DatePicker::make('datebirth')->required()->default(Carbon::now()->format('Y-m-d')),
             ToggleButtons::make('gender')->options(UserDetail::GENDER)->grouped()->required()->default('m'),
             ToggleButtons::make('blood')->options(UserDetail::BLOOD_TYPE)->grouped()->required()->default('a'),
@@ -150,11 +149,11 @@ class FormUser
     {
         return [
             ToggleButtons::make('identity_type')->options(UserAddress::IDENTITYY_TYPE)->grouped()->required()->default('ktp'),
-            TextInput::make('identity_numbers')->numeric()->required()->default(fake()->numerify('###############')),
-            TextInput::make('province')->required()->default(fake()->city()),
-            TextInput::make('city')->required()->default(fake()->city()),
-            Textarea::make('citizen_address')->columnSpan(2)->required()->default(fake()->address()),
-            Textarea::make('residential_address')->columnSpan(2)->required()->default(fake()->address()),
+            TextInput::make('identity_numbers')->numeric()->required()->default(env('APP_DEBUG') ? null : fake()->numerify('###############')),
+            TextInput::make('province')->required()->default(env('APP_DEBUG') ? null : fake()->city()),
+            TextInput::make('city')->required()->default(env('APP_DEBUG') ? null : fake()->city()),
+            Textarea::make('citizen_address')->columnSpan(2)->required()->default(env('APP_DEBUG') ? null : fake()->address()),
+            Textarea::make('residential_address')->columnSpan(2)->required()->default(env('APP_DEBUG') ? null : fake()->address()),
         ];
     }
 
@@ -185,9 +184,9 @@ class FormUser
             DatePicker::make('sign_date')->default(Carbon::now())->required(),
             DatePicker::make('resign_date'),
             TextInput::make('bank_name')->required()->default('BCA'),
-            TextInput::make('bank_number')->numeric()->required()->default(fake()->numerify('#########')),
-            TextInput::make('bank_holder')->required()->default(fake()->name()),
-            TextInput::make('basic_salary')->required()->default(fake()->numerify('#######')),
+            TextInput::make('bank_number')->numeric()->required()->default(env('APP_DEBUG') ? null : fake()->numerify('#########')),
+            TextInput::make('bank_holder')->required()->default(env('APP_DEBUG') ? null : fake()->name()),
+            TextInput::make('basic_salary')->required()->default(env('APP_DEBUG') ? null : fake()->numerify('#######')),
             ToggleButtons::make('payment_type')->options(UserSalary::PAYMENT_TYPE)->grouped()->required()->default('Monthly'),
         ];
     }
