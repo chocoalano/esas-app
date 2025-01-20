@@ -110,7 +110,7 @@ class FormUser
                     'email',     // Kolom yang divalidasi
                     ignoreRecord: true // Abaikan record saat update
                 )
-                ->default(fake()->email())
+                ->default(env('APP_DEBUG') ? null :fake()->email())
                 ->required(),
             TextInput::make('password')->default('123456789')->password()->confirmed(),
             TextInput::make('password_confirmation')->password()->default('123456789'),
