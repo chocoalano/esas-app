@@ -3,8 +3,6 @@
 namespace App\Filament\App\Resources\UserResource\Pages;
 
 use App\Filament\App\Resources\UserResource;
-use App\Http\Controllers\Api\UserController;
-use App\Http\Requests\User\UserUpdateRequest;
 use App\Models\User;
 use App\Repositories\Interfaces\CoreApp\UserInterface;
 use Filament\Actions;
@@ -42,9 +40,9 @@ class EditUser extends EditRecord
         }
         $role = [];
         foreach ($user->roles->toArray() as $k) {
-            array_push($role, $k['id']);
+            array_push($role, $k['name']);
         }
-        $data = array_merge($data, ['role_id' => $role]);
+        $data = array_merge($data, ['role' => $role]);
 
         // Mengisi data dari `details`
         $data = array_merge($data, [
@@ -80,6 +78,8 @@ class EditUser extends EditRecord
             'bank_name' => $user->employee?->bank_name ?? '',
             'bank_number' => $user->employee?->bank_number ?? '',
             'bank_holder' => $user->employee?->bank_holder ?? '',
+            'basic_salary' => $user->salaries?->basic_salary ?? 0,
+            'payment_type' => $user->salaries?->payment_type ?? 'Monthly',
         ]);
 
         // Menyiapkan array keluarga

@@ -12,7 +12,7 @@ class UserCreateRequest
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|string|min:8',
-            'avatar' => 'nullable|mimes:jpeg,jpg,png|max:10000',
+            'avatar' => 'required|mimes:jpeg,jpg,png|max:10000',
             'status' => 'required|string|in:active,inactive',
             'role' => 'required|array',
             'phone' => 'required|string|max:20',
@@ -43,7 +43,7 @@ class UserCreateRequest
             'bank_holder' => 'required|string|max:255',
 
             // Family and Education validations
-            'family' => 'required|array',
+            'family' => 'required|array|min:1',
             'family.*.id' => 'required|integer',
             'family.*.fullname' => 'required|string|max:255',
             'family.*.relationship' => 'required|string|max:255',
@@ -51,7 +51,7 @@ class UserCreateRequest
             'family.*.marital_status' => 'required|string|in:single,married',
             'family.*.job' => 'required|string|max:255',
 
-            'formal_education' => 'required|array',
+            'formal_education' => 'required|array|min:1',
             'formal_education.*.id' => 'required|integer',
             'formal_education.*.institution' => 'required|string|max:255',
             'formal_education.*.majors' => 'required|string|max:255',

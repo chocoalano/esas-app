@@ -36,11 +36,10 @@ class UserService implements UserInterface
     {
         try {
             DB::beginTransaction();
-            // Hash password or fallback to a default value
-            $password = $data['password'] ?? $data['password_confirmation'] ?? $data['nip'];
-            $hashedPassword = bcrypt($password);
+            // // Hash password or fallback to a default value
+            $hashedPassword = bcrypt($data['password']);
             // Create the main model
-            $model = $this->model->create([
+            $datacreate = [
                 'company_id' => $data['company_id'] ?? null,
                 'nip' => $data['nip'],
                 'name' => $data['name'],
@@ -48,7 +47,9 @@ class UserService implements UserInterface
                 'password' => $hashedPassword,
                 'avatar' => $data['avatar'] ?? 'default.png',
                 'status' => $data['status'] ?? 'active',
-            ]);
+            ];
+            // dd($datacreate);
+            $model = $this->model->create($datacreate);
             // Assign role to the user (validate role existence)
             if (!empty($data['role'])) {
                 $model->assignRole($data['role']);
@@ -63,9 +64,9 @@ class UserService implements UserInterface
             DB::rollBack();
             Log::error('Error creating user: ' . $e->getMessage(), [
                 'data' => $data,
-                'exception' => $e,
+                'exception' => $e->getMessage(),
             ]);
-            throw new \Exception('Failed to create user. Please try again.');
+            throw new \Exception('Failed to create user. Please try again. '.$e->getMessage());
         }
     }
 
@@ -177,6 +178,7 @@ class UserService implements UserInterface
                 'data' => $data,
                 'exception' => $e,
             ]);
+            dd($e->getMessage());
             throw new \Exception('Failed to update user. Please try again.');
         }
     }
@@ -196,10 +198,18 @@ class UserService implements UserInterface
         $model->employee()->updateOrCreate([], array_filter($data, fn($key) => in_array($key, ['departement_id', 'job_position_id', 'job_level_id', 'approval_line_id', 'approval_manager_id', 'join_date', 'sign_date', 'resign_date', 'bank_name', 'bank_number', 'bank_holder']), ARRAY_FILTER_USE_KEY));
 
         // Bulk update family, education, and work experience
-        $this->bulkUpdateOrCreate($model->families(), $data['family'] ?? []);
-        $this->bulkUpdateOrCreate($model->formalEducations(), $data['formal_education'] ?? []);
-        $this->bulkUpdateOrCreate($model->informalEducations(), $data['informal_education'] ?? []);
-        $this->bulkUpdateOrCreate($model->workExperiences(), $data['work_experience'] ?? []);
+        if (isset($data['family']) && count($data['family']) > 0) {
+            $this->bulkUpdateOrCreate($model->families(), $data['family'] ?? []);
+        }
+        if (isset($data['formal_education']) && count($data['formal_education']) > 0) {
+            $this->bulkUpdateOrCreate($model->formalEducations(), $data['formal_education'] ?? []);
+        }
+        if (isset($data['informal_education']) && count($data['informal_education']) > 0) {
+            $this->bulkUpdateOrCreate($model->informalEducations(), $data['informal_education'] ?? []);
+        }
+        if (isset($data['work_experience']) && count($data['work_experience']) > 0) {
+            $this->bulkUpdateOrCreate($model->workExperiences(), $data['work_experience'] ?? []);
+        }
     }
 
     private function bulkUpdateOrCreate($relation, $data)
