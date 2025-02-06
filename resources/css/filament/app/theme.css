@@ -1,0 +1,65 @@
+@import '/vendor/filament/filament/resources/css/theme.css';
+
+@config 'tailwind.config.js';
+
+.fi-layout {
+    @apply bg-[#f1f5f9] dark:bg-[#0f172a];
+}
+.fi-section {
+    @apply bg-white dark:bg-[#182734];
+}
+.fi-ta-ctn {
+    @apply bg-white dark:bg-[#0f192b];
+}
+/* sidebar::started */
+.fi-sidebar {
+    @apply bg-[#171B33] dark:bg-[#182734] shadow-sm ring-1 ring-gray-950/5 dark:bg-[#182734]/10;
+}
+.fi-sidebar-nav nav {
+    @apply shadow-sm ring-1 ring-gray-950/5 dark:bg-[#182734]/10;
+}
+.fi-sidebar-item-button {
+    @apply bg-[#171B33] dark:bg-[#0f172a]
+           hover:bg-[#333a48] text-white dark:hover:bg-white/5
+           focus-visible:bg-white dark:focus-visible:bg-white/5;
+}
+.fi-sidebar-item-active a{
+    @apply bg-[#333a48] dark:bg-primary-500;
+}
+.fi-logo{
+    @apply text-white dark:text-white;
+}
+.fi-sidebar-item-label{
+    @apply text-white dark:text-white
+}
+.fi-sidebar-item-icon{
+    @apply text-white dark:text-white
+}
+/* sidebar::ended */
+.fi-topbar > nav {
+    @apply bg-white dark:bg-[#050923] h-20
+}
+.fi-wi-stats-overview-stat {
+    @apply bg-white dark:bg-[#182734]
+}
+.fi-ta-ctn {
+    @apply bg-white dark:bg-[#182734]
+}
+.fi-modal-window {
+    @apply bg-white dark:bg-[#182734]
+}
+.fi-fo-tabs {
+    @apply bg-white dark:bg-[#182734]
+}
+.fi-card-profile {
+    @apply bg-white dark:bg-[#182734]
+}
+.fi-card-profile > ul {
+    @apply bg-white dark:bg-[#182734] divide-gray-300 dark:divide-gray-600
+}
+.fi-card-profile > h1, h3, p {
+    @apply text-gray-600 dark:text-gray-100
+}
+.fi-sidebar-header {
+    @apply bg-[#171B33] dark:bg-[#050923] h-20
+}
