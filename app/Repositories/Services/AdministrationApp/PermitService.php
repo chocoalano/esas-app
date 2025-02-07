@@ -1,6 +1,7 @@
 <?php
 namespace App\Repositories\Services\AdministrationApp;
 
+use App\FcmNotification\PermitNotification;
 use App\Models\AdministrationApp\Permit;
 use App\Models\AdministrationApp\PermitType;
 use App\Repositories\Interfaces\AdministrationApp\AttendanceInterface;
@@ -19,11 +20,13 @@ class PermitService implements PermitInterface
 {
     protected $model;
     protected $type;
+    protected $notif;
 
-    public function __construct(Permit $model, PermitType $type)
+    public function __construct(Permit $model, PermitType $type, PermitNotification $notif)
     {
         $this->model = $model;
         $this->type = $type;
+        $this->notif = $notif;
     }
 
     /**
@@ -139,11 +142,9 @@ class PermitService implements PermitInterface
             foreach ($data as $entry) {
                 $labelIndex = array_search($entry->date, $labels);
                 if ($labelIndex !== false) {
-                    switch ($status) {
-                        case 'total':
-                            $total[$labelIndex] = $entry->total;
-                            break;
-                    }
+                    $total[$labelIndex] = match ($status) {
+                        'total' => $entry->total,
+                    };
                 }
             }
         }
@@ -228,9 +229,7 @@ class PermitService implements PermitInterface
             foreach ($approval as $k) {
              array_push($userIds, $k['user_id']);
             }
-            $fcm = new FcmService();
-
-            $fcm->sendFcmPermit($userIds);
+            $this->notif->broadcast_approvals($userIds, "{$user->name}-{$user->nip}", $permitType->type);
         });
     }
 
@@ -320,6 +319,7 @@ class PermitService implements PermitInterface
         foreach ($find->approvals->toArray() as $k) {
             NotificationService::sendNotification('Informasi penindakan permintaan', $message, $url, $k['user_id']);
         }
+        $this->notif->broadcast_user_apply($user->id, "{Auth::user()->name}-{Auth::user()->nip}", $find->permitType->type);
         return true; // Proses berhasil
     }
 

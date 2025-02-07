@@ -30,4 +30,4 @@ Route::get('/secure-download/{filename}', function ($filename) {
     return Response::download($filePath);
 });
 
-Route::get('send-notification', [App\Http\Controllers\FirebaseController::class, 'SendPushNotification']);
+Route::get('send-notification', [App\Http\Controllers\FirebaseImplementController::class, 'index']);
