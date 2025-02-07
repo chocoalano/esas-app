@@ -11,7 +11,7 @@ class UploadFile
         try {
             // Pastikan direktori penyimpanan tersedia
             Storage::disk(env('FILESYSTEM_DISK'))->makeDirectory($folder);
-            $filename = $rename ? "$rename.png" : now()->format('YmdHis') . ".png";
+            $filename = ($rename ?: now()->format('YmdHis')) . '.png';
 
             // Membaca dan meresize gambar dengan Intervention Image
             $gambar = Image::make($image->getRealPath());
