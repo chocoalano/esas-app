@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const faceDescriptors = await Promise.all(
             labels.map(async (label) => {
                 try {
-                    const img = await faceapi.fetchImage(`/storage/avatar-users/${label}.png`);
+                    const img = await faceapi.fetchImage(`/api/assets/avatar-users/${label}.png`);
                     const detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
                     if (!detection) {
                         console.warn(`❌ Wajah tidak ditemukan di gambar ${label}`);

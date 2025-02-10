@@ -16,7 +16,7 @@ class UploadFile
             Storage::disk($disk)->makeDirectory($folder);
 
             // Tentukan nama file unik
-            $filename = $rename ?: now()->format('YmdHis').".png";
+            $filename = $rename ? "$rename.png" : now()->format('YmdHis').".png";
 
             // Baca gambar dengan Intervention Image
             $image = Image::read($image);
