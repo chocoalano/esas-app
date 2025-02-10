@@ -54,6 +54,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     const detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
                     if (!detection) {
                         console.warn(`❌ Wajah tidak ditemukan di gambar ${label}`);
+                        alert("⚠️ Wajah tidak terdeteksi pada avatar foto profil anda, pastikan anda sudah memperbaharui foto profil anda pada aplikasi esas!");
                         return null;
                     }
                     return new faceapi.LabeledFaceDescriptors(label, [detection.descriptor]);

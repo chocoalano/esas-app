@@ -9,7 +9,7 @@ class MacAddressMiddleware
     public function handle(Request $request, Closure $next)
     {
         $ipAddress = $request->ip();
-        $allowedIp = explode(',', "125.165.73.72,103.136.6.65,127.0.0.1");
+        $allowedIp = explode(',', "125.165.73.72,103.136.6.65,127.0.0.1,103.136.6.65,125.165.74.151");
         // dd($ipAddress, $allowedIp);
         if (!in_array($ipAddress, $allowedIp)) {
             return response()->view('errors.errors', [
