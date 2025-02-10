@@ -79,10 +79,10 @@ class PermitNotification
     {
         try {
             // Ambil token FCM dari database
-            $fcmToken = FcmModel::where('user_id', $user_target);
+            $fcmToken = FcmModel::where('user_id', $user_target)->first();
             $token = $fcmToken->device_token;
             $title = "Pemberitahuan Permohonan Izin/Cuti/Dispensasi";
-            $body = "Saya $$user_approve, telah menindak permohonan $type. Silahkan periksa sekarang.";
+            $body = "Saya $user_approve, telah menindak permohonan $type. Silahkan periksa sekarang.";
             $data = [
                 "actions" => [
                     [
