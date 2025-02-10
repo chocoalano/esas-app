@@ -1,6 +1,7 @@
 <?php
 namespace App\Models\CoreApp;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class Notification extends Model

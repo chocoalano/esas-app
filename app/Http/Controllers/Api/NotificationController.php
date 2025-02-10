@@ -24,9 +24,8 @@ class NotificationController extends Controller
 
             // Ambil data notifikasi dengan pagination
             $response = Notification::where('notifiable_id', auth()->id())
-            ->whereNull('read_at')
-            ->paginate($limit, ['*'], 'page', $page);
-
+                ->whereNull('read_at')
+                ->paginate($limit, ['*'], 'page', $page);
             // Kirim response sukses
             return $this->sendResponse($response, 'Notifications retrieved successfully.');
         } catch (\Illuminate\Validation\ValidationException $e) {

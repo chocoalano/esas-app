@@ -4,6 +4,7 @@ namespace App\FcmNotification;
 use App\Models\CoreApp\Notification;
 use App\Models\FcmModel;
 use App\Support\FcmService;
+use Illuminate\Support\Facades\Route;
 use Kreait\Firebase\Exception\FirebaseException;
 use Kreait\Firebase\Exception\MessagingException;
 
@@ -66,7 +67,7 @@ class PermitNotification
                 $notifsave->type = "Filament\Notifications\DatabaseNotification";
                 $notifsave->notifiable_type = "App\Models\User";
                 $notifsave->notifiable_id = $user_target_id;
-                $notifsave->data = json_encode($data);
+                $notifsave->data = $data;
                 $notifsave->save();
             }
             // $this->fcm->send($token, $title, $body, $data);
@@ -124,7 +125,7 @@ class PermitNotification
             $notifsave->type = "Filament\Notifications\DatabaseNotification";
             $notifsave->notifiable_type = "App\Models\User";
             $notifsave->notifiable_id = $user_target;
-            $notifsave->data = json_encode($data);
+            $notifsave->data = $data;
             $notifsave->save();
             $this->fcm->send($token, $title, $body, $data);
         } catch (MessagingException | FirebaseException $e) {
