@@ -51,7 +51,7 @@ class PermitNotification
                         "view" => "filament-actions::button-action",
                     ],
                 ],
-                "body" => "Testing pemberitahuan bosskuh",
+                "body" => $body,
                 "color" => null,
                 "duration" => "persistent",
                 "icon" => "heroicon-o-check-circle",
