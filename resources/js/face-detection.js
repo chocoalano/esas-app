@@ -146,6 +146,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         await loadModels();
         labeledFaceDescriptors = await loadLabeledImages();
         if (labeledFaceDescriptors.length === 0) {
+            alert("⚠️ Tidak ada wajah yang terdaftar, pastikan anda sudah memperbaharui foto profil anda pada aplikasi esas!");
             console.warn("⚠️ Tidak ada wajah yang terdaftar!");
         }
         await startVideo();
