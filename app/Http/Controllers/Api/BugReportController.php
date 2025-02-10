@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Tools\BugReportRequest;
 use App\Http\Resources\Tools\BugReportListPaginationResource;
 use App\Repositories\Interfaces\Tools\BugReportInterface;
+use App\Support\UploadFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -43,6 +44,12 @@ class BugReportController extends Controller
 
     public function store(Request $request)
     {
+        $valid = Validator::make($request->all(), BugReportRequest::rules());
+
+        if ($valid->fails()) {
+            return $this->sendError('Validation Error.', $valid->errors(), 422);
+        }
+        $this->proses->create($valid->getData());
         try {
             $valid = Validator::make($request->all(), BugReportRequest::rules());
 

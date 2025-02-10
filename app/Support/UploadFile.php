@@ -9,24 +9,24 @@ class UploadFile
     public static function uploadWithResize($image, $folder, ?string $rename = null)
     {
         try {
+            // Tentukan penyimpanan berdasarkan konfigurasi (lebih fleksibel)
+            $disk = env('FILESYSTEM_DISK');
+
             // Pastikan direktori penyimpanan tersedia
-            Storage::disk(env('FILESYSTEM_DISK'))->makeDirectory($folder);
-            $filename = ($rename ?: now()->format('YmdHis')) . '.png';
+            Storage::disk($disk)->makeDirectory($folder);
 
-            // Membaca dan meresize gambar dengan Intervention Image
-            $gambar = Image::make($image->getRealPath());
-            $gambar->resize(800, null, function ($constraint) {
-                $constraint->aspectRatio();
-                $constraint->upsize();
-            });
+            // Tentukan nama file unik
+            $filename = $rename ?: now()->format('YmdHis').".png";
 
-            // Simpan gambar ke storage
-            $path = Storage::disk(env('FILESYSTEM_DISK'))->path("$folder/$filename");
-            $gambar->save($path, 90); // Simpan dengan kualitas 90%
+            // Baca gambar dengan Intervention Image
+            $image = Image::read($image);
 
+            // Simpan gambar utama dengan kualitas 90%
+            $mainPath = Storage::disk($disk)->path("$folder/$filename");
+            $image->save($mainPath, 50);
             return "$folder/$filename";
         } catch (\Exception $e) {
-            throw new \RuntimeException("Gagal mengupload dan meresize gambar: " . $e->getMessage());
+            return back()->withErrors(['error' => 'Gagal mengupload gambar: ' . $e->getMessage()]);
         }
     }
     public static function uploadAttachment($file, $folder)
