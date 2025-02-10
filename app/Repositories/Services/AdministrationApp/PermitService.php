@@ -319,7 +319,7 @@ class PermitService implements PermitInterface
         foreach ($find->approvals->toArray() as $k) {
             NotificationService::sendNotification('Informasi penindakan permintaan', $message, $url, $k['user_id']);
         }
-        $this->notif->broadcast_user_apply($user->id, "{Auth::user()->name}-{Auth::user()->nip}", $find->permitType->type);
+        $this->notif->broadcast_user_apply($user->id, Auth::user()->name." - ".Auth::user()->nip, $find->permitType->type);
         return true; // Proses berhasil
     }
 
