@@ -110,7 +110,7 @@ class PermitNotification
                         "view" => "filament-actions::button-action",
                     ],
                 ],
-                "body" => "Permintaan anda telah di tindak lanjuti, silahkan periksa.",
+                "body" => $body,
                 "color" => null,
                 "duration" => "persistent",
                 "icon" => "heroicon-o-check-circle",
