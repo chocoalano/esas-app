@@ -94,7 +94,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                         statusText.innerText += ` | Pengenalan: ${bestMatch.toString()}`;
 
                         // Check if liveness is true and bestMatch distance is above the threshold (0.45)
-                        if (isLiveness && bestMatch.distance > 0.40) {
+                        // if (isLiveness && bestMatch.distance > 0.40) {
+                        if (isLiveness) {
                             // Prepare data to be sent
                             var nip = document.getElementById('nip').value;
                             var departement = document.getElementById('departement-selected').value;
