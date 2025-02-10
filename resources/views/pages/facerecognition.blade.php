@@ -94,7 +94,7 @@
             request()->query('type_presence') && request()->query('nip');
             @endphp
 
-            <div class="md:w-1/3 md:h-1/3 p-6 flex flex-col items-center justify-center">
+            <div class="md:w-1/2 md:h-1/2 p-6 flex flex-col items-center justify-center">
                 <h2 class="text-xl md:text-2xl font-semibold text-center mb-4">Face Recognition</h2>
                 <div class="border p-4 md:p-6 rounded-lg bg-gray-100 flex flex-col items-center relative">
                     @if ($isFormCompleted)
