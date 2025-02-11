@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\AssetsController;
 use App\Http\Controllers\Api\AttendanceController;
+use App\Http\Controllers\Api\AttendanceDeviceController;
 use App\Http\Controllers\Api\BugReportController;
 use App\Http\Controllers\Api\FormController;
 use App\Http\Controllers\Api\NotificationController;
@@ -13,6 +14,17 @@ use App\Http\Controllers\QrCodeController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/assets/{folder}/{filename}', [AssetsController::class, 'index']);
+
+Route::prefix('attendance-device')->group(function () {
+    Route::controller(AttendanceDeviceController::class)
+        ->group(function () {
+            Route::get('company', 'company');
+            Route::get('departement', 'departement');
+            Route::get('shift', 'shift');
+            Route::post('generate-qr', 'store');
+            Route::post('face-attendance', 'face_attendance');
+        });
+});
 
 Route::prefix('auth')->group(function () {
     Route::controller(UserController::class)
