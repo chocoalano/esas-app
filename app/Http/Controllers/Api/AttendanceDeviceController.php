@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\AdministrationApp\QrPresence;
 use App\Models\AdministrationApp\UserAttendance;
-use App\Models\CoreApp\Departement;
 use App\Models\User;
 use App\Repositories\Interfaces\CoreApp\DepartementInterface;
 use Illuminate\Database\QueryException;
@@ -48,6 +47,26 @@ class AttendanceDeviceController extends Controller
             return $this->sendResponse($data, 'List show shift successfully.');
         } catch (\Exception $e) {
             return $this->sendError('List failed.', ['error' => $e->getMessage()], 500);
+        }
+    }
+    public function validate_user(Request $request)
+    {
+        $validatedData = Validator::make($request->all(), [
+            'nip' => 'required|numeric',
+            'departement_id' => 'required|exists:departments,id',
+        ]);
+
+        $input = $validatedData->getData();
+        try {
+            $data = User::where('nip', 'like', '%' . $input['nip'] . '%')
+                ->whereHas('employee', function ($query) use ($input) {
+                    $query->where('departement_id', $input['departement_id']);
+                })
+                ->firstOrFail();
+            return $this->sendResponse($data, 'List show shift successfully.');
+        } catch (\Exception $e) {
+            // dd($e->getMessage());
+            return $this->sendError('User fetching failed.', ['error' => $e->getMessage()], 500);
         }
     }
 
@@ -150,7 +169,7 @@ class AttendanceDeviceController extends Controller
             // Log error untuk debugging
             \Log::error("Error Umum: " . $errorMessage);
 
-            return $this->sendError('Terjadi kesalahan server.', $e->getMessage(), 500 ); // Internal Server Error
+            return $this->sendError('Terjadi kesalahan server.', $e->getMessage(), 500); // Internal Server Error
         }
     }
 

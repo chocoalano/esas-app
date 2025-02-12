@@ -23,6 +23,7 @@ Route::prefix('attendance-device')->group(function () {
             Route::get('shift', 'shift');
             Route::post('generate-qr', 'store');
             Route::post('face-attendance', 'face_attendance');
+            Route::post('cek-nip', 'validate_user');
         });
 });
 
