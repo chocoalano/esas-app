@@ -14,18 +14,20 @@ class TableAttendance
         return [
             TextColumn::make('user.name'),
             TextColumn::make('schedule.work_day'),
+            TextColumn::make('time_in')->toggleable(isToggledHiddenByDefault: true),
+            TextColumn::make('time_out')->toggleable(isToggledHiddenByDefault: true),
             TextColumn::make('lat_in')
-                ->searchable(),
+                ->searchable()->toggleable(isToggledHiddenByDefault: true),
             TextColumn::make('lat_out')
-                ->searchable(),
+                ->searchable()->toggleable(isToggledHiddenByDefault: true),
             TextColumn::make('long_in')
-                ->searchable(),
+                ->searchable()->toggleable(isToggledHiddenByDefault: true),
             TextColumn::make('long_out')
-                ->searchable(),
-            ImageColumn::make('image_in'),
-            ImageColumn::make('image_out'),
-            TextColumn::make('status_in'),
-            TextColumn::make('status_out'),
+                ->searchable()->toggleable(isToggledHiddenByDefault: true),
+            ImageColumn::make('image_in')->toggleable(isToggledHiddenByDefault: true),
+            ImageColumn::make('image_out')->toggleable(isToggledHiddenByDefault: true),
+            TextColumn::make('status_in')->toggleable(isToggledHiddenByDefault: true),
+            TextColumn::make('status_out')->toggleable(isToggledHiddenByDefault: true),
             TextColumn::make('created_at')
                 ->dateTime()
                 ->sortable()

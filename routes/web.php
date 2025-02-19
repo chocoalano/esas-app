@@ -7,15 +7,9 @@ use App\Support\NotificationService;
 use Illuminate\Support\Facades\Route;
 use Kreait\Firebase\Messaging\CloudMessage;
 
-Route::get('/', [QrCodeController::class, 'index'])
-    ->middleware('mac.restrict')
-    ->name('index');
-Route::get('/face-recognition', [QrCodeController::class, 'face_recognition'])
-    ->middleware('mac.restrict')
-    ->name('face-recognition');
-Route::post('/face-recognition', [QrCodeController::class, 'face_recognition_store'])
-    ->middleware('mac.restrict')
-    ->name('face-recognition-store');
+Route::get('/', function () {
+    return redirect()->route('filament.app.auth.login');
+});
 
 Route::get('template-schedule', [TemplateImportController::class, 'schedule'])
     ->name('template.schedule');

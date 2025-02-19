@@ -1,2 +1,2 @@
 import './bootstrap';
-import './face-detection';
+// import './face-detection';

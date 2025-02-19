@@ -89,8 +89,8 @@ class AttendanceDeviceController extends Controller
             $input = $validator->getData();
             // Mendapatkan waktu saat ini
             $currentTime = Carbon::now();
-            // Menambahkan waktu kedaluwarsa (30 detik dari waktu saat ini)
-            $expiresAt = $currentTime->copy()->addSeconds(30);
+            // Menambahkan waktu kedaluwarsa (10 detik dari waktu saat ini)
+            $expiresAt = $currentTime->copy()->addSeconds(10);
             // Membuat token yang aman
             $token = Crypt::encryptString($currentTime->format('Y-m-d H:i:s'));
             $qr = QrPresence::firstOrCreate(
