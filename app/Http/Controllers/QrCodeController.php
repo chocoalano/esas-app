@@ -191,8 +191,7 @@ class QrCodeController extends Controller
             ])
             ->where([
                 ['qrp.type', '=', $type],
-                ['qrp.id', '=', $idtoken],
-                ['qrp.token', '=', $token]
+                ['qrp.id', '=', $idtoken]
             ])
             ->first();
         if (!$qrPresence) {
