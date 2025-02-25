@@ -248,9 +248,7 @@ class FormUser
 
     public static function isReadOnly()
     {
-        $cek_role = in_array(auth()->user()->role, ['super_admin', 'Administrator']);
-        // dd($cek_role);
-        return $cek_role;
+        return auth()->user()->hasRole('super_admin') || auth()->user()->hasRole('Administrator') ? true : false;
     }
 
     public static function family()
