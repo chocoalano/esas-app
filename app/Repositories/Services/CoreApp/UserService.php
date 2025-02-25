@@ -167,7 +167,9 @@ class UserService implements UserInterface
             }
             $model->save();
             // Assign role to the user
-            $model->syncRoles($data['role']);
+            if (isset($data['role'])) {
+                $model->syncRoles($data['role']);
+            }
             $this->updateOrCreateRelatedData($model, $data);
 
             DB::commit();
