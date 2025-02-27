@@ -11,6 +11,7 @@ use App\Models\CoreApp\TimeWork;
 use App\Models\User;
 use App\Repositories\Interfaces\CoreApp\TimeWorkInterface;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -54,6 +55,22 @@ class FormAttendance
             TextInput::make('long_out')
                 ->required()
                 ->maxLength(100),
+            TimePicker::make('time_in')
+                ->label('Select Time In')
+                ->withoutSeconds()
+                ->native(false)
+                ->format('H:i')
+                ->displayFormat('H:i')
+                ->closeOnDateSelection()
+                ->required(),
+            TimePicker::make('time_out')
+                ->label('Select Time Out')
+                ->withoutSeconds()
+                ->native(false)
+                ->format('H:i')
+                ->displayFormat('H:i')
+                ->closeOnDateSelection()
+                ->required(),
             ToggleButtons::make('status_in')
                 ->options(UserAttendance::STATUS)
                 ->grouped()
