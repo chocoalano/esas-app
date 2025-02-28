@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Attendance;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Carbon;
 
 class AttendanceDetailResource extends JsonResource
 {
@@ -22,8 +23,12 @@ class AttendanceDetailResource extends JsonResource
             "image_out" => $this->image_out,
             "status_in" => $this->status_in,
             "status_out" => $this->status_out,
-            "created_at" => $this->created_at,
-            "updated_at" => $this->updated_at,
+            "created_at" => $this->formatDate($this->created_at),
+            "updated_at" => $this->formatDate($this->updated_at),
         ];
+    }
+    private function formatDate($date)
+    {
+        return $date ? Carbon::parse($date)->timezone(config('app.timezone'))->format('Y-m-d') : null;
     }
 }
