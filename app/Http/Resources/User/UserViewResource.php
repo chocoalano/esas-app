@@ -1,9 +1,9 @@
 <?php
-
 namespace App\Http\Resources\User;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Carbon\Carbon;
 
 class UserViewResource extends JsonResource
 {
@@ -19,7 +19,7 @@ class UserViewResource extends JsonResource
             'name' => $this->name,
             'nip' => $this->nip,
             'email' => $this->email,
-            'email_verified_at' => $this->email_verified_at,
+            'email_verified_at' => $this->formatDate($this->email_verified_at),
             'password' => $this->password,
             'avatar' => $this->avatar,
             'status' => $this->status,
@@ -36,7 +36,7 @@ class UserViewResource extends JsonResource
             'bank_holder' => $this->bank_holder,
             'phone' => $this->phone,
             'placebirth' => $this->placebirth,
-            'datebirth' => $this->datebirth,
+            'datebirth' => $this->formatDate($this->datebirth),
             'gender' => $this->gender,
             'blood' => $this->blood,
             'marital_status' => $this->marital_status,
@@ -52,11 +52,19 @@ class UserViewResource extends JsonResource
             'job_level_id' => $this->job_level_id,
             'approval_line_id' => $this->approval_line_id,
             'approval_manager_id' => $this->approval_manager_id,
-            'join_date' => $this->join_date,
-            'sign_date' => $this->sign_date,
-            'resign_date' => $this->resign_date,
+            'join_date' => $this->formatDate($this->join_date),
+            'sign_date' => $this->formatDate($this->sign_date),
+            'resign_date' => $this->formatDate($this->resign_date),
             'departement' => $this->departement,
             'position' => $this->position,
         ];
+    }
+
+    /**
+     * Format tanggal untuk memastikan tidak ada perbedaan zona waktu.
+     */
+    private function formatDate($date)
+    {
+        return $date ? Carbon::parse($date)->timezone(config('app.timezone'))->format('Y-m-d') : null;
     }
 }
