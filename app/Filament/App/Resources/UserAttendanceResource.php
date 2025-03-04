@@ -18,6 +18,7 @@ use Filament\Tables\Table;
 use App\Models\views\AttendanceView;
 use App\Repositories\Interfaces\AdministrationApp\AttendanceInterface;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Auth;
 
 class UserAttendanceResource extends Resource implements HasShieldPermissions
 {
@@ -77,7 +78,8 @@ class UserAttendanceResource extends Resource implements HasShieldPermissions
                                     ->danger()
                                     ->send();
                             }
-                        }),
+                        })
+                        ->visible(fn() => Auth::user()->hasRole(['Administrator', 'super_admin'])),
                     Tables\Actions\DeleteAction::make(),
                 ]),
             ])
