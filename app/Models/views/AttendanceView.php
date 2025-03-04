@@ -2,6 +2,10 @@
 
 namespace App\Models\views;
 
+use App\Models\CoreApp\Departement;
+use App\Models\CoreApp\JobLevel;
+use App\Models\CoreApp\JobPosition;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 class AttendanceView extends Model
@@ -41,4 +45,27 @@ class AttendanceView extends Model
         'created_at',
         'updated_at',
     ];
+
+    public const STATUS = [
+        'late' => 'Late',
+        'unlate' => 'Unlate',
+        'normal' => 'Normal',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+    public function departement_relation()
+    {
+        return $this->belongsTo(Departement::class, 'departement_id', 'id');
+    }
+    public function lvl_relation()
+    {
+        return $this->belongsTo(JobLevel::class, 'job_level_id', 'id');
+    }
+    public function position_relation()
+    {
+        return $this->belongsTo(JobPosition::class, 'job_position_id', 'id');
+    }
 }

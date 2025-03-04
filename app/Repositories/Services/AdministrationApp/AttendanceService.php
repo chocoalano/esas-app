@@ -6,6 +6,7 @@ use App\Models\views\AttendanceView;
 use App\Repositories\Interfaces\AdministrationApp\AttendanceInterface;
 use App\Support\StringSupport;
 use App\Support\UploadFile;
+use Exception;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -317,6 +318,53 @@ class AttendanceService implements AttendanceInterface
 
         // Return the structured data
         return $dataToCache;
+    }
+
+    public function correction(UserAttendance $record, array $data)
+    {
+        return DB::transaction(function () use ($record, $data) {
+            $att = UserAttendance::findOrFail($record->id);
+
+            $cek = DB::table('permits as p')
+                ->join('permit_types as pt', 'p.permit_type_id', '=', 'pt.id')
+                ->join('permit_approves as pa', 'p.id', '=', 'pa.permit_id')
+                ->where('p.permit_numbers', $data['no_permit'])
+                ->where('p.user_id', $att->user_id)
+                ->where('pt.type', $data['correction'])
+                ->selectRaw('
+                    SUM(CASE WHEN pa.user_approve = "y" THEN 1 ELSE 0 END) AS approve_total,
+                    SUM(CASE WHEN pa.user_approve = "n" THEN 1 ELSE 0 END) AS rejected_total,
+                    SUM(CASE WHEN pa.user_approve = "w" THEN 1 ELSE 0 END) AS waiting_total,
+                    p.*
+                ')
+                ->groupBy('p.id')
+                ->first();
+
+            if (!$cek) {
+                throw new Exception('Invalid Correction Numbers');
+            }
+
+            if ($cek->rejected_total >= 1 || $cek->waiting_total >= 1) {
+                throw new Exception('Correction request is either rejected or still waiting for approval.');
+            }
+
+            if ($data['correction'] === 'Izin Koreksi Absen') {
+                $att->time_in = $cek->timein_adjust;
+                $att->time_out = $cek->timeout_adjust;
+                $att->status_in = 'normal';
+                $att->status_out = 'normal';
+            }
+
+            if ($data['correction'] === 'izin perubahan jam kerja') {
+                if (!$att->user_timework_schedule_id) {
+                    throw new Exception('Correction request cannot have schedule before!');
+                }else{
+                    $att->schedule->update(['time_work_id', $cek->adjust_shift_id]);
+                }
+            }
+
+            return $att->save();
+        }, 1);
     }
 
 }

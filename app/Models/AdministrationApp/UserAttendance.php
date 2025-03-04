@@ -3,6 +3,7 @@ namespace App\Models\AdministrationApp;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class UserAttendance extends Model
 {
@@ -31,6 +32,15 @@ class UserAttendance extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+    public function getUserDeptAttribute()
+    {
+        return DB::table('users as u')
+            ->join('user_employes as ue', 'u.id', '=', 'ue.user_id')
+            ->join('departements as d', 'ue.departement_id', '=', 'd.id')
+            ->where('u.id', $this->user_id)
+            ->pluck('d.name')
+            ->first() ?? 'Unknown';
     }
     public function schedule()
     {

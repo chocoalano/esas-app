@@ -4,6 +4,8 @@ namespace App\Filament\App\Resources\UserTimeworkScheduleResource\Pages;
 
 use App\Filament\App\Resources\UserTimeworkScheduleResource;
 use App\Filament\Exports\AttendanceScheduleExporter;
+use App\Models\CoreApp\Company;
+use App\Models\CoreApp\Departement;
 use App\Repositories\Interfaces\AdministrationApp\ScheduleAttendanceInterface;
 use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
@@ -14,6 +16,7 @@ use Filament\Resources\Pages\ManageRecords;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use Filament\Forms\Components\Select;
 
 class ManageUserTimeworkSchedules extends ManageRecords
 {
@@ -36,7 +39,7 @@ class ManageUserTimeworkSchedules extends ManageRecords
 
                     $jadwal = []; // Menyimpan jadwal yang akan dimasukkan
                     $skipDays = $data['dayoff'] ?? []; // Hari yang dilewati
-
+        
                     // Iterasi tanggal
                     while ($workDayStart <= $workDayFinish) {
                         if (!in_array($workDayStart->format('l'), $skipDays)) {
@@ -64,7 +67,19 @@ class ManageUserTimeworkSchedules extends ManageRecords
                 ->outlined()
                 ->icon('bi-filetype-xlsx')
                 ->color('warning')
-                ->url(fn(): string => route('template.schedule')),
+                ->form([
+                    Select::make('company_id')
+                        ->label('Choose company')
+                        ->options(Company::all()->pluck('name', 'id'))
+                        ->searchable(),
+                    Select::make('departement_id')
+                        ->label('Choose departement')
+                        ->options(Departement::all()->pluck('name', 'id'))
+                        ->searchable()
+                ])
+                ->action(function (array $data): void {
+                    redirect()->route('template.schedule', $data);
+                }),
             Actions\Action::make('import')
                 ->visible(fn() => auth()->user()->can('import_user::timework::schedule'))
                 ->label('Import Data')
@@ -86,7 +101,7 @@ class ManageUserTimeworkSchedules extends ManageRecords
                             'template' => 'The template file is required.',
                         ]);
                     }
-                    $file = public_path("storage/" . $data['template']);
+                    $file = storage_path("app/public/" . $data['template']);
                     try {
                         $spreadsheet = IOFactory::load($file);
                         $sheet = $spreadsheet->getSheetByName('Main Data');
@@ -108,7 +123,7 @@ class ManageUserTimeworkSchedules extends ManageRecords
 
                         // Debug (untuk melihat hasil array)
                         // dd($formattedData);
-
+        
                         // Lanjutkan proses (misalnya, simpan ke database)
                         $scheduleAttendanceRepository = app(ScheduleAttendanceInterface::class);
                         $import = $scheduleAttendanceRepository->import($formattedData);

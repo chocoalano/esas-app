@@ -76,7 +76,7 @@ class ScheduleAttendanceService implements ScheduleAttendanceInterface
     /**
      * @inheritDoc
      */
-    public function template()
+    public function template(int $company, int $departement)
     {
         $user = Auth::user();
         $spreadsheet = new Spreadsheet();
@@ -123,12 +123,13 @@ class ScheduleAttendanceService implements ScheduleAttendanceInterface
 
         // Filter berdasarkan role
         if ($user->hasRole(['Admin Departement', 'Member'])) {
-            $dataTemplateQuery->where('c.id', $user->company_id)
-                ->where('d.id', $user->employee->departement_id);
+            $dataTemplateQuery->where('c.id', $company)
+                ->where('d.id', $departement);
         }
 
         // Eksekusi query
         $dataTemplate = $dataTemplateQuery->get();
+
 
         // Isi data ke sheet utama
         if ($dataTemplate->isNotEmpty()) {
@@ -158,11 +159,10 @@ class ScheduleAttendanceService implements ScheduleAttendanceInterface
         ->select('time_workes.name', 'companies.name as company', 'departements.name as departemen');
         if ($user->hasRole(['Admin Departement', 'Member'])) {
             $shiftQuery
-            ->where('company_id', $user->company_id)
-            ->where('departemen_id', $user->employee->departemens_id);
+            ->where('time_workes.company_id', $company)
+            ->where('time_workes.departemen_id', $departement);
         }
         $shifts = $shiftQuery->get();
-
         if ($shifts->isNotEmpty()) {
             $row = 2;
             foreach ($shifts as $shift) {

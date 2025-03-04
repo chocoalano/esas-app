@@ -120,6 +120,25 @@ class FormAttendance
                 ->required(),
         ];
     }
+    public static function koreksi_absen()
+    {
+        return [
+            Section::make('Presence Corrcetion')
+                ->description('This form requires the reference number of the approved absence correction submission for the user to be revised.')
+                ->schema([
+                    ToggleButtons::make('correction')
+                        ->options([
+                            'Izin Koreksi Absen' => 'Izin Koreksi Absen',
+                            'izin perubahan jam kerja' => 'Izin perubahan jam kerja (Perubahan Shift)',
+                        ])
+                        ->grouped()
+                        ->required(),
+                    TextInput::make('no_permit')
+                        ->label('Presence correction numbers')
+                        ->required()
+                ])
+        ];
+    }
 
     public static function timework_schedule() // Pastikan model disuntikkan
     {

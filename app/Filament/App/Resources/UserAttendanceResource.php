@@ -9,13 +9,15 @@ use App\Filament\App\Resources\UserAttendanceResource\RelationManagers;
 use App\Filament\App\Tables\Administration\TableAttendance;
 use App\Models\AdministrationApp\UserAttendance;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
-use Filament\Forms;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
+use App\Models\views\AttendanceView;
+use App\Repositories\Interfaces\AdministrationApp\AttendanceInterface;
+use Filament\Notifications\Notification;
 
 class UserAttendanceResource extends Resource implements HasShieldPermissions
 {
@@ -49,6 +51,7 @@ class UserAttendanceResource extends Resource implements HasShieldPermissions
     public static function table(Table $table): Table
     {
         return $table
+            ->query(AttendanceView::query())
             ->columns(TableAttendance::table())
             ->filters(TableAttendance::filter(), layout: FiltersLayout::AboveContent)
             ->actions([
@@ -56,6 +59,25 @@ class UserAttendanceResource extends Resource implements HasShieldPermissions
                     Tables\Actions\ReplicateAction::make(),
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
+                    Tables\Actions\Action::make('koreksi')
+                        ->icon('heroicon-o-pencil-square')
+                        ->form(FormAttendance::koreksi_absen())
+                        ->action(function (array $data, AttendanceView $record): void {
+                            $detail = UserAttendance::find($record->id);
+                            $proses = app(AttendanceInterface::class)->correction($detail, $data);
+                            if ($proses) {
+                                Notification::make()
+                                    ->title('Saved successfully')
+                                    ->success()
+                                    ->send();
+                            }else{
+                                Notification::make()
+                                    ->title('Saved unsuccessfully')
+                                    ->body($proses)
+                                    ->danger()
+                                    ->send();
+                            }
+                        }),
                     Tables\Actions\DeleteAction::make(),
                 ]),
             ])

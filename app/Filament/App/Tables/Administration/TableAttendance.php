@@ -12,8 +12,15 @@ class TableAttendance
     public static function table()
     {
         return [
-            TextColumn::make('user.name'),
-            TextColumn::make('schedule.work_day'),
+            TextColumn::make('name'),
+            TextColumn::make('nip'),
+            TextColumn::make('departement'),
+            TextColumn::make('position'),
+            TextColumn::make('level'),
+            TextColumn::make('work_day'),
+            // TextColumn::make('user.name'),
+            // TextColumn::make('getUserDeptAttribute'),
+            // TextColumn::make('schedule.work_day')->searchable()->toggleable(isToggledHiddenByDefault: true),
             TextColumn::make('time_in')->toggleable(isToggledHiddenByDefault: true),
             TextColumn::make('time_out')->toggleable(isToggledHiddenByDefault: true),
             TextColumn::make('lat_in')
@@ -47,9 +54,19 @@ class TableAttendance
                 ->relationship('user', 'name')
                 ->searchable()
                 ->preload(),
-            SelectFilter::make('day_work')
-                ->label('Filter by day work')
-                ->relationship('schedule', 'work_day')
+            SelectFilter::make('level')
+                ->label('Filter by level')
+                ->relationship('lvl_relation', 'name')
+                ->searchable()
+                ->preload(),
+            SelectFilter::make('position')
+                ->label('Filter by position')
+                ->relationship('position_relation', 'name')
+                ->searchable()
+                ->preload(),
+            SelectFilter::make('departement')
+                ->label('Filter by departement')
+                ->relationship('departement_relation', 'name')
                 ->searchable()
                 ->preload(),
             DateRangeFilter::make('created_at')
