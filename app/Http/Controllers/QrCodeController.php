@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Facades\Log;
 
 class QrCodeController extends Controller
 {
@@ -160,7 +161,11 @@ class QrCodeController extends Controller
         try {
             return $this->qrAttendance(Auth::id(), $validatedData['type'], $validatedData['id'], $validatedData['token']);
         } catch (\Exception $e) {
-            dd($e->getMessage());
+            Log::error("Terjadi kesalahan absensi QR: " . $e->getMessage(), [
+                'exception' => $e,
+                'user_id' => auth()->id(), // Tambahkan user ID jika ada
+                'request_data' => request()->all(), // Log request data jika perlu
+            ]);
             return $this->sendError('Terjadi kesalahan server.', $e->getMessage(), 500);
         }
     }
