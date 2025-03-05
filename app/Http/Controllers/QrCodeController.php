@@ -270,7 +270,7 @@ class QrCodeController extends Controller
                     'lat_in' => $type === 'in' ? $company->latitude : $attendance->lat_in,
                     'long_in' => $type === 'in' ? $company->longitude : $attendance->long_in,
                     'type_in' => $type === 'in' ? 'qrcode' : $attendance->type_in,
-                    'created_by' => $type === 'in' ? $userId : null,
+                    'created_by' => $type === 'in' ? $userId : $userId,
                     'time_out' => $type === 'out' ? $currentTime : $attendance->time_out,
                     'status_out' => $type === 'out' ? $statusInOut : ($attendance->status_out ?? 'normal'),
                     'lat_out' => $type === 'out' ? $company->latitude : $attendance->lat_out,
