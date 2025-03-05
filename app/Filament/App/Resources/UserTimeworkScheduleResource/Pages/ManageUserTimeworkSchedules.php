@@ -34,8 +34,8 @@ class ManageUserTimeworkSchedules extends ManageRecords
                     }
 
                     // Konversi tanggal mulai dan selesai
-                    $workDayStart = Carbon::parse($data['work_day_start']);
-                    $workDayFinish = Carbon::parse($data['work_day_finish']);
+                    $workDayStart = Carbon::parse($data['work_day_start'])->timezone(config('app.timezone'));
+                    $workDayFinish = Carbon::parse($data['work_day_finish'])->timezone(config('app.timezone'));
 
                     $jadwal = []; // Menyimpan jadwal yang akan dimasukkan
                     $skipDays = $data['dayoff'] ?? []; // Hari yang dilewati
