@@ -3,6 +3,7 @@ namespace App\Models\AdministrationApp;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class UserAttendance extends Model
@@ -23,7 +24,24 @@ class UserAttendance extends Model
         'image_out',
         'status_in',
         'status_out',
+        'created_by',
+        'updated_by',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+                $model->created_by = $model->user_id;
+        });
+
+        static::updating(function ($model) {
+            if (Auth::check()) {
+                $model->updated_by = Auth::id();
+            }
+        });
+    }
 
     public const STATUS = [
         'late' => 'Late',

@@ -37,22 +37,29 @@ class ManageUserTimeworkSchedules extends ManageRecords
                     $workDayStart = Carbon::parse($data['work_day_start'])->timezone(config('app.timezone'));
                     $workDayFinish = Carbon::parse($data['work_day_finish'])->timezone(config('app.timezone'));
 
+                    // Pastikan tanggal mulai tidak lebih besar dari tanggal selesai
+                    if ($workDayStart->greaterThan($workDayFinish)) {
+                        throw new \Exception('Tanggal mulai tidak boleh lebih besar dari tanggal selesai.');
+                    }
+
                     $jadwal = []; // Menyimpan jadwal yang akan dimasukkan
                     $skipDays = $data['dayoff'] ?? []; // Hari yang dilewati
         
                     // Iterasi tanggal
-                    while ($workDayStart <= $workDayFinish) {
-                        if (!in_array($workDayStart->format('l'), $skipDays)) {
-                            // Tambahkan data untuk setiap user_id
-                            $jadwal = array_merge($jadwal, array_map(function ($userId) use ($workDayStart, $data) {
-                                return [
+                    while ($workDayStart->lte($workDayFinish)) {
+                        $dayName = $workDayStart->format('l'); // Nama hari dalam bahasa Inggris
+        
+                        if (!in_array($dayName, $skipDays)) {
+                            foreach ($data['user_id'] as $userId) {
+                                $jadwal[] = [
                                     'user_id' => $userId,
                                     'time_work_id' => $data['time_work_id'],
                                     'work_day' => $workDayStart->toDateString(),
                                 ];
-                            }, $data['user_id']));
+                            }
                         }
-                        $workDayStart->addDay();
+
+                        $workDayStart = $workDayStart->addDay();
                     }
 
                     // Kirim data ke queue

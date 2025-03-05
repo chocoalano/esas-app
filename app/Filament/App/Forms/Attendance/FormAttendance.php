@@ -142,6 +142,15 @@ class FormAttendance
 
     public static function timework_schedule() // Pastikan model disuntikkan
     {
+        $hari = [
+            'Monday' => 'Senin',
+            'Tuesday' => 'Selasa',
+            'Wednesday' => 'Rabu',
+            'Thursday' => 'Kamis',
+            'Friday' => 'Jumat',
+            'Saturday' => 'Sabtu',
+            'Sunday' => 'Minggu',
+        ];
         return [
             Select::make('company_id')
                 ->label('Choose company')
@@ -220,15 +229,7 @@ class FormAttendance
                 ->visible(fn(Get $get) => $get('company_id') !== null && $get('departement') !== null && $get('user_id') !== null ? true : false)
                 ->required(),
             Select::make('dayoff')
-                ->options([
-                    'Monday' => 'Minggu',
-                    'Tuesday' => 'Senin',
-                    'Wednesday' => 'Selasa',
-                    'Thursday' => 'Rabu',
-                    'Friday' => 'Kamis',
-                    'Saturday' => 'Jumat',
-                    'Sunday' => 'Sabtu',
-                ])
+                ->options($hari)
                 ->multiple()
                 ->visible(fn(Get $get) => $get('company_id') !== null && $get('departement') !== null && $get('user_id') !== null ? true : false)
                 ->required()
