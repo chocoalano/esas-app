@@ -7,6 +7,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Support\Carbon;
 use Malzariey\FilamentDaterangepickerFilter\Filters\DateRangeFilter;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 class TableAttendance
 {
     public static function table()
@@ -51,22 +53,26 @@ class TableAttendance
         return [
             SelectFilter::make('user')
                 ->label('Filter by user')
-                ->relationship('user', 'name')
+                ->relationship('user', 'name', fn(Builder $query) => $query->with('company'))
+                ->getOptionLabelFromRecordUsing(fn(Model $record) => "{$record->company->name} | NIP:{$record->nip} | {$record->name}")
                 ->searchable()
                 ->preload(),
             SelectFilter::make('level')
                 ->label('Filter by level')
-                ->relationship('lvl_relation', 'name')
+                ->relationship('lvl_relation', 'name', fn(Builder $query) => $query->with('company', 'departement'))
+                ->getOptionLabelFromRecordUsing(fn(Model $record) => "{$record->company->name} | Dept:{$record->departement->name} |Lvl: {$record->name}")
                 ->searchable()
                 ->preload(),
             SelectFilter::make('position')
                 ->label('Filter by position')
-                ->relationship('position_relation', 'name')
+                ->relationship('position_relation', 'name', fn(Builder $query) => $query->with('company', 'departement'))
+                ->getOptionLabelFromRecordUsing(fn(Model $record) => "{$record->company->name} | Dept:{$record->departement->name} |Lvl: {$record->name}")
                 ->searchable()
                 ->preload(),
             SelectFilter::make('departement')
                 ->label('Filter by departement')
-                ->relationship('departement_relation', 'name')
+                ->relationship('departement_relation', 'name', fn(Builder $query) => $query->with('company'))
+                ->getOptionLabelFromRecordUsing(fn(Model $record) => "{$record->company->name} | Dept:{$record->name}")
                 ->searchable()
                 ->preload(),
             DateRangeFilter::make('created_at')

@@ -13,6 +13,8 @@ class UserAttendance extends Model
         'user_timework_schedule_id',
         'time_in',
         'time_out',
+        'type_in',
+        'type_out',
         'lat_in',
         'lat_out',
         'long_in',
@@ -27,6 +29,11 @@ class UserAttendance extends Model
         'late' => 'Late',
         'unlate' => 'Unlate',
         'normal' => 'Normal',
+    ];
+    public const TYPE_ATTENDANACE = [
+        'qrcode' => 'Late',
+        'face-device' => 'Unlate',
+        'face-geolocation' => 'Normal',
     ];
 
     public function user()

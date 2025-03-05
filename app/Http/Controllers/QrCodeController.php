@@ -264,10 +264,12 @@ class QrCodeController extends Controller
                     'status_in' => $type === 'in' ? $statusInOut : $attendance->status_in,
                     'lat_in' => $type === 'in' ? $company->latitude : $attendance->lat_in,
                     'long_in' => $type === 'in' ? $company->longitude : $attendance->long_in,
+                    'type_in' => $type === 'in' ? 'qrcode' : $attendance->type_in,
                     'time_out' => $type === 'out' ? $currentTime : $attendance->time_out,
                     'status_out' => $type === 'out' ? $statusInOut : ($attendance->status_out ?? 'normal'),
                     'lat_out' => $type === 'out' ? $company->latitude : $attendance->lat_out,
                     'long_out' => $type === 'out' ? $company->longitude : $attendance->long_out,
+                    'type_out' => $type === 'out' ? 'qrcode' : $attendance->type_out,
                 ]);
             } else {
                 // Buat absen baru jika belum ada
@@ -280,10 +282,12 @@ class QrCodeController extends Controller
                     'status_in' => $type === 'in' ? $statusInOut : 'normal',
                     'lat_in' => $type === 'in' ? $company->latitude : null,
                     'long_in' => $type === 'in' ? $company->longitude : null,
+                    'type_in' => $type === 'in' ? 'qrcode' : null,
                     'time_out' => $type === 'out' ? $currentTime : null,
                     'status_out' => $type === 'out' ? $statusInOut : 'normal',
                     'lat_out' => $type === 'out' ? $company->latitude : null,
                     'long_out' => $type === 'out' ? $company->longitude : null,
+                    'type_out' => $type === 'out' ? 'qrcode' : null,
                 ]);
             }
 
