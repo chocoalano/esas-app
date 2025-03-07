@@ -50,20 +50,21 @@ class UserTimeworkScheduleResource extends Resource implements HasShieldPermissi
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(function (Builder $query) {
-                if(auth()->user()->hasRole('super_admin')||auth()->user()->hasRole('Administrator')){
-                    return $query;
-                } else {
-                    $user = User::whereHas('employee', function($q){
-                        $q->where('departement_id', auth()->user()->employee->departement_id);
-                    })->get();
-                    $userId = [];
-                    foreach ($user as $k) {
-                        array_push($userId, $k['id']);
-                    }
-                    return $query->whereIn('user_id', $userId);
-                }
-            })
+            // ->modifyQueryUsing(function (Builder $query) {
+            //     if(auth()->user()->hasRole('super_admin')||auth()->user()->hasRole('Administrator')){
+            //         return $query;
+            //     } else {
+            //         $user = User::whereHas('employee', function($q){
+            //             $q->where('departement_id', auth()->user()->employee->departement_id);
+            //         })->get();
+            //         $userId = [];
+            //         foreach ($user as $k) {
+            //             array_push($userId, $k['id']);
+            //         }
+            //         return $query->whereIn('user_id', $userId);
+            //     }
+            // })
+            ->query(UserTimeworkSchedule::query())
             ->columns(TableTimeAttendanceSchedule::table())
             ->filters(TableTimeAttendanceSchedule::filter(), layout: FiltersLayout::AboveContent)
             ->filtersFormColumns(3)
@@ -74,7 +75,8 @@ class UserTimeworkScheduleResource extends Resource implements HasShieldPermissi
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->paginated([5,10,15,20]);
     }
 
     public static function getPages(): array

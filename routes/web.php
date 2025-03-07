@@ -3,6 +3,7 @@
 use App\Events\FcmNotification;
 use App\Http\Controllers\QrCodeController;
 use App\Http\Controllers\TemplateImportController;
+use App\Http\Controllers\Api\AttendanceController;
 use App\Support\NotificationService;
 use Illuminate\Support\Facades\Route;
 use Kreait\Firebase\Messaging\CloudMessage;
@@ -13,6 +14,8 @@ Route::get('/', function () {
 
 Route::get('template-schedule', [TemplateImportController::class, 'schedule'])
     ->name('template.schedule');
+Route::get('/export-attendance', [AttendanceController::class, 'export'])
+    ->name('download.report.attendance');
 
 Route::get('/secure-download/{filename}', function ($filename) {
     $filePath = storage_path("app/private/{$filename}");

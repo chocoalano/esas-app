@@ -9,8 +9,10 @@ use App\Http\Resources\Attendance\AttendanceLIstPaginateResource;
 use App\Http\Resources\Attendance\AttendanceResource;
 use App\Repositories\Interfaces\AdministrationApp\AttendanceInterface;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AttendanceController extends Controller
 {
@@ -86,5 +88,57 @@ class AttendanceController extends Controller
         } catch (\Throwable $e) {
             return $this->sendError('Process error.', ['error' => $e->getMessage()], 500);
         }
+    }
+
+    public function export(Request $request)
+    {
+        $request->validate([
+            'start' => 'required|date',
+            'end' => 'required|date',
+        ]);
+
+        // Ambil data dari service
+        $process = app(AttendanceInterface::class);
+        $data = $process->report($request->start, $request->end);
+
+        if (empty($data)) {
+            return response()->json(['error' => 'No data available for the selected period'], 400);
+        }
+
+        // Buat Spreadsheet baru
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set Header
+        $headers = array_keys((array) $data[0]); // Ambil key dari array pertama
+        $columnIndex = 'A';
+
+        foreach ($headers as $header) {
+            $sheet->setCellValue($columnIndex . '1', strtoupper($header));
+            $columnIndex++;
+        }
+
+        // Isi Data
+        $rowNumber = 2;
+        foreach ($data as $row) {
+            $columnIndex = 'A';
+            foreach ((array) $row as $value) {
+                $sheet->setCellValue($columnIndex . $rowNumber, $value);
+                $columnIndex++;
+            }
+            $rowNumber++;
+        }
+
+        // Simpan sebagai file Excel dan kirim ke browser
+        $writer = new Xlsx($spreadsheet);
+        $fileName = "attendance_report.xlsx";
+
+        return new StreamedResponse(function () use ($writer) {
+            $writer->save('php://output');
+        }, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => "attachment; filename={$fileName}",
+            'Cache-Control' => 'max-age=0',
+        ]);
     }
 }

@@ -60,7 +60,8 @@ class UserResource extends Resource implements HasShieldPermissions
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->paginated([5, 10, 15, 20]);
     }
 
     public static function getRelations(): array
