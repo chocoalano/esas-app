@@ -16,9 +16,10 @@ class TableTimeAttendanceSchedule
         return [
             TextColumn::make('user.nip')->label('NIK')->searchable(),
             TextColumn::make('user.name')->label('Name')->searchable(),
-            SelectColumn::make('timework.id')
-                ->options(TimeWork::all()->pluck('name', 'id'))
-                ->rules(['required']),
+            TextColumn::make('timework.name')->label('Time Name')->searchable(),
+            // SelectColumn::make('timework.id')
+            //     ->options(TimeWork::with('')->all()->pluck('name', 'id'))
+            //     ->rules(['required']),
             TextColumn::make('timework.in')->label('in')->searchable(),
             TextColumn::make('timework.out')->label('out')->searchable(),
             TextColumn::make('work_day')->date()->searchable(),
