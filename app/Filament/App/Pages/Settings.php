@@ -21,6 +21,15 @@ class Settings extends Page
 
     public ?array $data = [];
 
+    public static function canAccess(): bool
+    {
+        if (auth()->user()->hasAnyRole(['super_admin', 'Administrator'])) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public function form(Form $form): Form
     {
         return $form

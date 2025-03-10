@@ -52,15 +52,15 @@ class TimeWorkResource extends Resource implements HasShieldPermissions
             ->filtersFormColumns(3)
             ->actions([
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ReplicateAction::make(),
-                    Tables\Actions\ViewAction::make(),
-                    Tables\Actions\EditAction::make(),
-                    Tables\Actions\DeleteAction::make(),
+                    Tables\Actions\ReplicateAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'administrator']) ? true : false),
+                    Tables\Actions\ViewAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'administrator']) ? true : false),
+                    Tables\Actions\EditAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'administrator']) ? true : false),
+                    Tables\Actions\DeleteAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'administrator']) ? true : false),
                 ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'administrator']) ? true : false),
                 ]),
             ]);
     }

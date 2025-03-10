@@ -13,7 +13,7 @@ class ManageJobPositions extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'administrator']) ? true : false),
         ];
     }
 }

@@ -69,11 +69,11 @@ class UserTimeworkScheduleResource extends Resource implements HasShieldPermissi
             ->filters(TableTimeAttendanceSchedule::filter(), layout: FiltersLayout::AboveContent)
             ->filtersFormColumns(3)
             ->actions([
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'administrator']) ? true : false),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'administrator']) ? true : false),
                 ]),
             ])
             ->paginated([5,10,15,20]);

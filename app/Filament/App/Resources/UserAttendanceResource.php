@@ -57,9 +57,9 @@ class UserAttendanceResource extends Resource implements HasShieldPermissions
             ->filters(TableAttendance::filter(), layout: FiltersLayout::AboveContent)
             ->actions([
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ReplicateAction::make(),
-                    Tables\Actions\ViewAction::make(),
-                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\ReplicateAction::make()->visible(auth()->user()->hasAnyRole(['super_admin']) ? true : false),
+                    Tables\Actions\ViewAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'administrator']) ? true : false),
+                    Tables\Actions\EditAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'administrator']) ? true : false),
                     Tables\Actions\Action::make('koreksi')
                         ->icon('heroicon-o-pencil-square')
                         ->form(FormAttendance::koreksi_absen())
@@ -80,12 +80,12 @@ class UserAttendanceResource extends Resource implements HasShieldPermissions
                             }
                         })
                         ->visible(fn() => Auth::user()->hasRole(['Administrator', 'super_admin'])),
-                    Tables\Actions\DeleteAction::make(),
+                    Tables\Actions\DeleteAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'administrator']) ? true : false),
                 ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'administrator']) ? true : false),
                 ]),
             ])
             ->paginated([5,10,15,20]);

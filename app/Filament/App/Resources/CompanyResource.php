@@ -62,14 +62,14 @@ class CompanyResource extends Resource implements HasShieldPermissions
                                 $replica->full_address = fake()->address();
                             }
                         }),
-                    Tables\Actions\ViewAction::make(),
-                    Tables\Actions\EditAction::make(),
-                    Tables\Actions\DeleteAction::make(),
+                    Tables\Actions\ViewAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'administrator']) ? true : false),
+                    Tables\Actions\EditAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'administrator']) ? true : false),
+                    Tables\Actions\DeleteAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'administrator']) ? true : false),
                 ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'administrator']) ? true : false),
                 ]),
             ]);
     }

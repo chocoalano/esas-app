@@ -21,9 +21,9 @@ class ManageUserAttendances extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'administrator']) ? true : false),
             Actions\Action::make('presence')
-                ->visible(fn() => auth()->user()->can('create_user::attendance'))
+                ->visible(auth()->user()->hasAnyRole(['super_admin', 'administrator']) ? true : false)
                 ->outlined()
                 ->form([
                     Section::make(FormAttendance::presence())
@@ -38,7 +38,7 @@ class ManageUserAttendances extends ManageRecords
                     }
                 }),
             Actions\Action::make('report')
-                ->visible(fn() => auth()->user()->can('create_user::attendance'))
+                ->visible(auth()->user()->hasAnyRole(['super_admin', 'administrator']) ? true : false)
                 ->outlined()
                 ->form([
                     DatePicker::make('start')->required(),

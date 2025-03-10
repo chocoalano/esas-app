@@ -56,7 +56,7 @@ class PermitResource extends Resource implements HasShieldPermissions
                     Tables\Actions\ReplicateAction::make(),
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
-                    Tables\Actions\DeleteAction::make(),
+                    Tables\Actions\DeleteAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'administrator']) ? true : false),
                     Tables\Actions\Action::make('approval')
                         ->icon('fluentui-signature-24')
                         ->visible(fn(Permit $record): bool => self::isApproveAuthorized($record))
@@ -108,7 +108,7 @@ class PermitResource extends Resource implements HasShieldPermissions
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'administrator']) ? true : false),
                 ]),
             ])->paginated([5, 10, 15, 20]);
     }
