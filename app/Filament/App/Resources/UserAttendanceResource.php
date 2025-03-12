@@ -56,17 +56,11 @@ class UserAttendanceResource extends Resource implements HasShieldPermissions
         return $table
             ->query(AttendanceView::query())
             ->modifyQueryUsing(function (Builder $query) {
-                if(auth()->user()->hasRole('super_admin')||auth()->user()->hasRole('Administrator')){
+                if(auth()->user()->hasRole('super_admin') || auth()->user()->hasRole('Administrator')){
                     return $query;
                 } else {
-                    $user = User::whereHas('employee', function($q){
-                        $q->where('departement_id', auth()->user()->employee->departement_id);
-                    })->get();
-                    $userId = [];
-                    foreach ($user as $k) {
-                        array_push($userId, $k['id']);
-                    }
-                    return $query->whereIn('user_id', $userId);
+                    $id = auth()->user()->employee->departement_id;
+                    return $query->where('departement_id', $id);
                 }
             })
             ->columns(TableAttendance::table())

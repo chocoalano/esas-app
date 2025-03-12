@@ -21,7 +21,7 @@ class ManageUserAttendances extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'Administrator']) ? true : false),
+            Actions\CreateAction::make()->visible(auth()->user()->hasAnyRole(['super_admin']) ? true : false),
             Actions\Action::make('presence')
                 ->visible(auth()->user()->hasAnyRole(['super_admin', 'Administrator']) ? true : false)
                 ->outlined()
