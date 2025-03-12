@@ -8,6 +8,7 @@ use App\Filament\App\Resources\UserAttendanceResource\Pages;
 use App\Filament\App\Resources\UserAttendanceResource\RelationManagers;
 use App\Filament\App\Tables\Administration\TableAttendance;
 use App\Models\AdministrationApp\UserAttendance;
+use App\Models\User;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
@@ -18,6 +19,7 @@ use Filament\Tables\Table;
 use App\Models\views\AttendanceView;
 use App\Repositories\Interfaces\AdministrationApp\AttendanceInterface;
 use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
 class UserAttendanceResource extends Resource implements HasShieldPermissions
@@ -53,13 +55,27 @@ class UserAttendanceResource extends Resource implements HasShieldPermissions
     {
         return $table
             ->query(AttendanceView::query())
+            ->modifyQueryUsing(function (Builder $query) {
+                if(auth()->user()->hasRole('super_admin')||auth()->user()->hasRole('Administrator')){
+                    return $query;
+                } else {
+                    $user = User::whereHas('employee', function($q){
+                        $q->where('departement_id', auth()->user()->employee->departement_id);
+                    })->get();
+                    $userId = [];
+                    foreach ($user as $k) {
+                        array_push($userId, $k['id']);
+                    }
+                    return $query->whereIn('user_id', $userId);
+                }
+            })
             ->columns(TableAttendance::table())
             ->filters(TableAttendance::filter(), layout: FiltersLayout::AboveContent)
             ->actions([
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\ReplicateAction::make()->visible(auth()->user()->hasAnyRole(['super_admin']) ? true : false),
-                    Tables\Actions\ViewAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'administrator']) ? true : false),
-                    Tables\Actions\EditAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'administrator']) ? true : false),
+                    Tables\Actions\ViewAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'Administrator']) ? true : false),
+                    Tables\Actions\EditAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'Administrator']) ? true : false),
                     Tables\Actions\Action::make('koreksi')
                         ->icon('heroicon-o-pencil-square')
                         ->form(FormAttendance::koreksi_absen())
@@ -80,12 +96,12 @@ class UserAttendanceResource extends Resource implements HasShieldPermissions
                             }
                         })
                         ->visible(fn() => Auth::user()->hasRole(['Administrator', 'super_admin'])),
-                    Tables\Actions\DeleteAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'administrator']) ? true : false),
+                    Tables\Actions\DeleteAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'Administrator']) ? true : false),
                 ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'administrator']) ? true : false),
+                    Tables\Actions\DeleteBulkAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'Administrator']) ? true : false),
                 ]),
             ])
             ->paginated([5,10,15,20]);
