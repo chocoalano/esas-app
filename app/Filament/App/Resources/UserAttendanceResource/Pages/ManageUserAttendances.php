@@ -23,7 +23,7 @@ class ManageUserAttendances extends ManageRecords
         return [
             Actions\CreateAction::make()->visible(auth()->user()->hasAnyRole(['super_admin']) ? true : false),
             Actions\Action::make('presence')
-                ->visible(auth()->user()->hasAnyRole(['super_admin', 'Administrator']) ? true : false)
+                ->visible(auth()->user()->hasAnyRole(['super_admin']) ? true : false)
                 ->outlined()
                 ->form([
                     Section::make(FormAttendance::presence())
