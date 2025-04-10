@@ -61,7 +61,7 @@ class AttendanceService implements AttendanceInterface
         if ($find) {
             $find->delete();
         }
-        return $find;
+        return $find ? true : false;
     }
 
     /**
@@ -371,41 +371,55 @@ class AttendanceService implements AttendanceInterface
     /**
      * @inheritDoc
      */
-    public function report($startDate, $endDate)
+    public function report($startDate, $endDate, $departement)
     {
+        $dates = collect(CarbonPeriod::create($startDate, $endDate));
+
         $query = DB::table('users AS u')
             ->select([
-                'u.nip AS employee_id',
-                'u.name AS first_name',
-                'd.name AS departement',
-                'jp.name AS position',
-                'jl.name AS level',
+                'u.nip as employee_id',
+                'u.name as first_name',
+                'd.name as departement',
+                'jp.name as position',
+                'jl.name as level',
                 'ue.join_date',
-                DB::raw("SUM(CASE WHEN pt.type IN (
-                'Dispensasi Menikah', 
-                'Dispensasi menikahkan anak',
-                'Dispensasi khitan/baptis anak', 
-                'Dispensasi Keluarga/Anggota Keluarga Dalam Satu Rumah Meninggal',
-                'Dispensasi Melahirkan/Keguguran', 
-                'Dispensasi Ibadah Agama',
-                'Dispensasi Wisuda (anak/pribadi)', 
-                'Dispensasi Lain-lain',
-                'Dispensasi Tugas Kantor (dalam/luar kota)'
-            ) THEN 1 ELSE 0 END) AS dispensasi"),
-                DB::raw("SUM(CASE WHEN pt.type IN (
-                'Izin Sakit (surat dokter & resep)', 
-                'Izin Sakit (tanpa surat dokter)',
-                'Izin Sakit Kecelakaan Kerja (surat dokter & resep)', 
-                'Izin Sakit (rawat inap)',
-                'Izin Koreksi Absen', 
-                'izin perubahan jam kerja'
-            ) THEN 1 ELSE 0 END) AS izin"),
-                DB::raw("SUM(CASE WHEN pt.type IN ('Cuti Tahunan', 'Unpaid Leave (Cuti Tidak Dibayar)') THEN 1 ELSE 0 END) AS cuti"),
             ])
-            ->addSelect(collect(CarbonPeriod::create($startDate, $endDate))->map(function ($date) {
+            ->addSelect($dates->map(function ($date) {
                 $formattedDate = $date->format('Y-m-d');
-                return DB::raw("MAX(CASE WHEN DATE(ua.created_at) = '$formattedDate' THEN CONCAT(ua.time_in, ' - ', ua.time_out) ELSE NULL END) AS `$formattedDate`");
+                // Gunakan COALESCE agar tetap menampilkan meskipun salah satu NULL
+                return DB::raw(
+                    "MAX(CASE WHEN DATE(ua.created_at) = '{$formattedDate}' " .
+                    "THEN CONCAT(COALESCE(ua.time_in, '-'), ' - ', COALESCE(ua.time_out, '-')) " .
+                    "ELSE NULL END) AS `{$formattedDate}`"
+                );
             })->toArray())
+            ->addSelect([
+                DB::raw("SEC_TO_TIME(SUM(
+                CASE
+                    WHEN ua.time_in IS NOT NULL AND tw.in IS NOT NULL AND ua.time_in > tw.in
+                    THEN TIME_TO_SEC(TIMEDIFF(ua.time_in, tw.in))
+                    ELSE 0
+                END
+            )) as total_jam_terlambat"),
+
+                DB::raw("SUM(CASE WHEN pt.type IN (
+                'Dispensasi Menikah', 'Dispensasi menikahkan anak',
+                'Dispensasi khitan/baptis anak', 'Dispensasi Keluarga/Anggota Keluarga Dalam Satu Rumah Meninggal',
+                'Dispensasi Melahirkan/Keguguran', 'Dispensasi Ibadah Agama',
+                'Dispensasi Wisuda (anak/pribadi)', 'Dispensasi Lain-lain',
+                'Dispensasi Tugas Kantor (dalam/luar kota)'
+            ) THEN 1 ELSE 0 END) as dispensasi"),
+
+                DB::raw("SUM(CASE WHEN pt.type IN (
+                'Izin Sakit (surat dokter & resep)', 'Izin Sakit (tanpa surat dokter)',
+                'Izin Sakit Kecelakaan Kerja (surat dokter & resep)', 'Izin Sakit (rawat inap)',
+                'Izin Koreksi Absen', 'izin perubahan jam kerja'
+            ) THEN 1 ELSE 0 END) as izin"),
+
+                DB::raw("SUM(CASE WHEN pt.type IN (
+                'Cuti Tahunan', 'Unpaid Leave (Cuti Tidak Dibayar)'
+            ) THEN 1 ELSE 0 END) as cuti"),
+            ])
             ->join('user_employes AS ue', 'u.id', '=', 'ue.user_id')
             ->join('departements AS d', 'ue.departement_id', '=', 'd.id')
             ->join('job_positions AS jp', 'ue.job_position_id', '=', 'jp.id')
@@ -416,6 +430,8 @@ class AttendanceService implements AttendanceInterface
             })
             ->leftJoin('permits AS p', 'p.user_id', '=', 'u.id')
             ->leftJoin('permit_types AS pt', 'p.permit_type_id', '=', 'pt.id')
+            ->leftJoin('user_timework_schedules AS uts', 'uts.id', '=', 'ua.user_timework_schedule_id')
+            ->leftJoin('time_workes AS tw', 'uts.time_work_id', '=', 'tw.id')
             ->groupBy(
                 'u.id',
                 'u.nip',
@@ -427,10 +443,13 @@ class AttendanceService implements AttendanceInterface
                 'ue.sign_date',
                 'ue.resign_date'
             )
-            ->orderBy('u.name', 'ASC')
-            ->get();
+            ->orderBy('u.name', 'ASC');
 
-        return $query;
+        if (!empty($departement)) {
+            $query->whereIn('d.id', $departement);
+        }
+
+        return $query->get();
     }
 
 }

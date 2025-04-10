@@ -5,9 +5,11 @@ namespace App\Filament\App\Resources\UserAttendanceResource\Pages;
 use App\Filament\App\Forms\Attendance\FormAttendance;
 use App\Filament\App\Forms\FormConfig;
 use App\Filament\App\Resources\UserAttendanceResource;
+use App\Models\CoreApp\Departement;
 use App\Repositories\Interfaces\AdministrationApp\AttendanceInterface;
 use Filament\Actions;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Resources\Pages\ManageRecords;
 use Filament\Forms\Components\DatePicker;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -41,12 +43,19 @@ class ManageUserAttendances extends ManageRecords
                 ->visible(auth()->user()->hasAnyRole(['super_admin', 'Administrator']) ? true : false)
                 ->outlined()
                 ->form([
-                    DatePicker::make('start')->required(),
-                    DatePicker::make('end')->required(),
+                    Section::make()->schema([
+                        DatePicker::make('start')->required(),
+                        DatePicker::make('end')->required(),
+                        Select::make('departement')
+                            ->multiple()
+                            ->options(Departement::all()->pluck('name', 'id'))
+                            ->searchable()
+                            ->preload(),
+                    ])->columns(2)
                 ])
                 ->action(function (array $data) {
                     $process = app(AttendanceInterface::class);
-                    $data = $process->report($data['start'], $data['end']);
+                    $data = $process->report($data['start'], $data['end'], $data['departement']);
                     // Buat Spreadsheet baru
                     $spreadsheet = new Spreadsheet();
                     $sheet = $spreadsheet->getActiveSheet();

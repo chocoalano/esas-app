@@ -5,6 +5,7 @@ namespace App\Filament\App\Resources;
 use App\Filament\App\Forms\FormUser;
 use App\Filament\App\Resources\UserResource\Pages;
 use App\Filament\App\Tables\TableUser;
+use App\Models\AdministrationApp\UserAttendance;
 use App\Models\User;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms\Form;
@@ -50,6 +51,11 @@ class UserResource extends Resource implements HasShieldPermissions
             ->filtersFormColumns(4)
             ->actions([
                 Tables\Actions\ActionGroup::make([
+                    Tables\Actions\Action::make('reset_device_id')
+                        ->visible(auth()->user()->hasAnyRole(['super_admin', 'Administrator']) ? true : false)
+                        ->icon('heroicon-o-device-phone-mobile')
+                        ->requiresConfirmation()
+                        ->action(fn(UserAttendance $record) => $record->update(['device_id' => null])),
                     Tables\Actions\ReplicateAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'Administrator']) ? true : false),
                     Tables\Actions\ViewAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'Administrator']) ? true : false),
                     Tables\Actions\EditAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'Administrator']) ? true : false),

@@ -86,8 +86,8 @@ class AppPanelProvider extends PanelProvider
                 AdvancedStatsOverviewWidget::class,
                 AttendanceChartWidget::class,
                 PermitChartWidget::class,
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                // Widgets\AccountWidget::class,
+                // Widgets\FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

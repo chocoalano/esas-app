@@ -56,7 +56,7 @@ class UserAttendanceResource extends Resource implements HasShieldPermissions
         return $table
             ->query(AttendanceView::query())
             ->modifyQueryUsing(function (Builder $query) {
-                if(auth()->user()->hasRole('super_admin') || auth()->user()->hasRole('Administrator')){
+                if (auth()->user()->hasRole('super_admin') || auth()->user()->hasRole('Administrator')) {
                     return $query;
                 } else {
                     $id = auth()->user()->employee->departement_id;
@@ -73,18 +73,18 @@ class UserAttendanceResource extends Resource implements HasShieldPermissions
                     Tables\Actions\Action::make('koreksi')
                         ->icon('heroicon-o-pencil-square')
                         ->form(FormAttendance::koreksi_absen())
-                        ->action(function (array $data, AttendanceView $record): void {
-                            $detail = UserAttendance::find($record->id);
-                            $proses = app(AttendanceInterface::class)->correction($detail, $data);
-                            if ($proses) {
+                        ->action(function (array $data, UserAttendance $record): void {
+                            $proses = app(AttendanceInterface::class)->correction($record, $data);
+
+                            if ($proses === true) {
                                 Notification::make()
                                     ->title('Saved successfully')
                                     ->success()
                                     ->send();
-                            }else{
+                            } else {
                                 Notification::make()
                                     ->title('Saved unsuccessfully')
-                                    ->body($proses)
+                                    ->body(is_string($proses) ? $proses : 'Unknown error')
                                     ->danger()
                                     ->send();
                             }
@@ -98,7 +98,7 @@ class UserAttendanceResource extends Resource implements HasShieldPermissions
                     Tables\Actions\DeleteBulkAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'Administrator']) ? true : false),
                 ]),
             ])
-            ->paginated([5,10,15,20]);
+            ->paginated([5, 10, 15, 20]);
     }
 
     public static function getPages(): array
