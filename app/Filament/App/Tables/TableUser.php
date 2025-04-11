@@ -41,6 +41,7 @@ class TableUser
                 ])
                 ->toggleable(isToggledHiddenByDefault: true),
             TextInputColumn::make('employee.saldo_cuti')
+                ->label('Saldo Cuti')
                 ->rules(['required', 'numeric', 'min:0', 'max:12'])
                 ->beforeStateUpdated(function ($record, $state) {
                     // Simpan saldo_cuti baru ke relasi employee

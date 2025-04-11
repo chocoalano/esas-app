@@ -3,7 +3,9 @@ namespace App\Filament\App\Tables\Administration;
 
 use App\Models\AdministrationApp\UserAttendance;
 use App\Models\CoreApp\Company;
+use Auth;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Support\Carbon;
@@ -36,8 +38,32 @@ class TableAttendance
                 ->searchable()->toggleable(isToggledHiddenByDefault: true),
             ImageColumn::make('image_in')->toggleable(isToggledHiddenByDefault: true),
             ImageColumn::make('image_out')->toggleable(isToggledHiddenByDefault: true),
-            TextColumn::make('status_in')->toggleable(isToggledHiddenByDefault: true),
-            TextColumn::make('status_out')->toggleable(isToggledHiddenByDefault: true),
+            SelectColumn::make('status_in')
+                ->disabled(fn() => Auth::user()->hasRole(['Administrator', 'super_admin']) ? false : true)
+                ->options([
+                    'late' => 'Late',
+                    'unlate' => 'Unlate',
+                    'normal' => 'Normal',
+                ])
+                ->beforeStateUpdated(function ($record, $state) {
+                    $record->status_in = $state;
+                    $record->updated_by = auth()->id();
+                    $record->employee->save();
+                })
+                ->toggleable(isToggledHiddenByDefault: true),
+            SelectColumn::make('status_out')
+                ->disabled(fn() => Auth::user()->hasRole(['Administrator', 'super_admin']) ? false : true)
+                ->options([
+                    'late' => 'Late',
+                    'unlate' => 'Unlate',
+                    'normal' => 'Normal',
+                ])
+                ->beforeStateUpdated(function ($record, $state) {
+                    $record->status_out = $state;
+                    $record->updated_by = auth()->id();
+                    $record->employee->save();
+                })
+                ->toggleable(isToggledHiddenByDefault: true),
             TextColumn::make('created_at')
                 ->dateTime()
                 ->sortable()

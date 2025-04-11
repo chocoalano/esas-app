@@ -1,6 +1,7 @@
 <?php
 namespace App\Filament\App\Pages;
 
+use App\Models\User;
 use Filament\Forms\Form;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Component;
@@ -34,9 +35,15 @@ class Login extends BaseAuth
 
     protected function getCredentialsFromFormData(array $data): array
     {
-        return [
+        $cek = User::where([
             'nip' => $data['nip'],
-            'password'  => $data['password'],
-        ];
+            'status' => 'active'
+        ])->first();
+        if ($cek) {
+            return [
+                'nip' => $cek->nip,
+                'password' => $data['password'],
+            ];
+        }
     }
 }
