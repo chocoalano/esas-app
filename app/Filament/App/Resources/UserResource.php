@@ -52,10 +52,10 @@ class UserResource extends Resource implements HasShieldPermissions
             ->actions([
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\Action::make('reset_device_id')
-                        ->visible(auth()->user()->hasAnyRole(['super_admin', 'Administrator']) ? true : false)
+                        ->visible(fn() => auth()->user()->hasAnyRole(['super_admin', 'Administrator']))
                         ->icon('heroicon-o-device-phone-mobile')
                         ->requiresConfirmation()
-                        ->action(fn(UserAttendance $record) => $record->update(['device_id' => null])),
+                        ->action(fn(User $record) => $record->update(['device_id' => null])),
                     Tables\Actions\ReplicateAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'Administrator']) ? true : false),
                     Tables\Actions\ViewAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'Administrator']) ? true : false),
                     Tables\Actions\EditAction::make()->visible(auth()->user()->hasAnyRole(['super_admin', 'Administrator']) ? true : false),
