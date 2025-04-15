@@ -17,6 +17,7 @@ return new class extends Migration {
             $table->boolean('approve_line')->default(true);
             $table->boolean('approve_manager')->default(true);
             $table->boolean('approve_hr')->default(true);
+            $table->boolean('with_file')->default(true);
             $table->timestamps();
         });
         Schema::create('permits', function (Blueprint $table) {
@@ -43,6 +44,7 @@ return new class extends Migration {
             $table->time('start_time')->nullable();
             $table->time('end_time')->nullable();
             $table->longText('notes')->nullable();
+            $table->string('file');
             $table->timestamps();
         });
         Schema::create('permit_approves', function (Blueprint $table) {

@@ -84,6 +84,7 @@ return new class extends Migration {
             $table->string('avatar');
             $table->enum('status', ['active', 'inactive', 'resign'])->default('active');
             $table->rememberToken();
+            $table->string('device_id');
             $table->timestamps();
         });
         Schema::create('user_timework_schedules', function (Blueprint $table) {
@@ -110,6 +111,8 @@ return new class extends Migration {
                 ->index();
             $table->time('time_in')->nullable();
             $table->time('time_out')->nullable();
+            $table->enum('type_in', ['qrcode', 'face-device', 'face-geolocation'])->default('qrcode');
+            $table->enum('type_out', ['qrcode', 'face-device', 'face-geolocation'])->default('qrcode');
             $table->string('lat_in', 100)->nullable();
             $table->string('lat_out', 100)->nullable();
             $table->string('long_in', 100)->nullable();
@@ -118,6 +121,8 @@ return new class extends Migration {
             $table->string('image_out')->nullable();
             $table->enum('status_in', ['late', 'unlate', 'normal'])->default('normal');
             $table->enum('status_out', ['late', 'unlate', 'normal'])->default('normal');
+            $table->foreignId('created_by')->nullable();
+            $table->foreignId('updated_by')->nullable();
             $table->timestamps();
         });
         Schema::create('user_details', function (Blueprint $table) {
