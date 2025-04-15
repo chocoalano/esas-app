@@ -17,6 +17,7 @@ return new class extends Migration {
             $table->boolean('approve_line')->default(true);
             $table->boolean('approve_manager')->default(true);
             $table->boolean('approve_hr')->default(true);
+            $table->boolean('show_mobile')->default(true);
             $table->boolean('with_file')->default(true);
             $table->timestamps();
         });

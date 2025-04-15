@@ -84,7 +84,7 @@ return new class extends Migration {
             $table->string('avatar');
             $table->enum('status', ['active', 'inactive', 'resign'])->default('active');
             $table->rememberToken();
-            $table->string('device_id');
+            $table->string('device_id')->nullable();
             $table->timestamps();
         });
         Schema::create('user_timework_schedules', function (Blueprint $table) {
