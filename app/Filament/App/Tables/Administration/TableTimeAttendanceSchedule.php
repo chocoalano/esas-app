@@ -37,12 +37,12 @@ class TableTimeAttendanceSchedule
     public static function filter()
     {
         return [
-            // SelectFilter::make('user')
-            //     ->label('Filter by user')
-            //     ->relationship('user', 'name', fn(Builder $query) => $query->with('company'))
-            //     ->getOptionLabelFromRecordUsing(fn(Model $record) => "{$record->company->name} | {$record->name}")
-            //     ->searchable()
-            //     ->preload(),
+            SelectFilter::make('user')
+                ->label('Filter by user')
+                ->relationship('user', 'name', fn(Builder $query) => $query->with('company'))
+                ->getOptionLabelFromRecordUsing(fn(Model $record) => "{$record->company->name} | {$record->name}")
+                ->searchable()
+                ->preload(),
             SelectFilter::make('time')
                 ->label('Filter by time')
                 ->relationship('timework', 'name', fn(Builder $query) => $query->with('department', 'company'))
